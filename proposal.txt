@@ -1,0 +1,34 @@
+PROPOSAL
+
+RPG
+
+Elements of the project:
+
+-A terminal session where a player can chat with other party members or input commands
+    a)The program will recognize a command by checking if there is a special character in the first index of the input (such as a colon)
+    b)Inputs without special characters will print as a normal message
+        Example:
+        Ricky types "heal me"
+        Kevin types "no"
+        Kevin types ":use 1 on matthew"
+        Ricky types "i hate you"
+        
+        Display:
+        [Ricky]heal me
+        [Kevin]no
+        Kevin used move 1(Heal) on Matthew!
+        [Ricky]i hate you
+        
+-A terminal session that displays sprites, player statistics, and move choices
+    a)Will be linked to the chat terminal through PIPES
+    b)Utilizes a HANDSHAKE to make sure the two terminals are connected
+    c)Makes decisions based on the output recieved from the chat terminal
+    
+-Party members will be linked through NETWORKING
+    a)every player's display terminal will update every time a move is made
+
+-GUI is comprised of two windows, one will be the aforementioned terminal and the
+other will be a terminal or a sdl window used purely as a graphical utility.
+
+
+
