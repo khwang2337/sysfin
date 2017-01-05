@@ -38,7 +38,10 @@ other will be a terminal or a sdl window used purely as a graphical utility.
     -Party System
         -Players can form parties in the lobby
         -Party leader has the party powers: kick, delegate, etc.
-        
+    
+    -Ready System
+        -The party leader can enter the dungeon after all the players are ready
+    
     -Friend System(perhaps)
     
     -Dungeon-based Experience
