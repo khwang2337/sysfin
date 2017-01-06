@@ -9,7 +9,7 @@ USER INTERFACE
 All user interaction is performed through terminal windows, no GUI planned.
 Two main elements of the user experience
 -A terminal session where a player can chat with other party members or input commands
-    a)The program will recognize a command by checking if there is a special character in the first index of the input (such as a colon)
+    a)The program will recognize a command by checking if there is a special character in the first index of the input (such as a slash)
     b)Inputs without special characters will print as a normal message
         Example:
         Ricky types "heal me"
@@ -22,7 +22,7 @@ Two main elements of the user experience
         [Kevin] no
         <Kevin> used Heal on <Matthew>!
         [Ricky] i hate you
-
+    c)Typing /help _____ will display gameplay instructions
 -A terminal session that displays sprites, player statistics, and move choices
     a)Will be linked to the chat terminal through PIPES
     b)Utilizes a HANDSHAKE to make sure the two terminals are connected
@@ -39,51 +39,55 @@ Class topics used:
 -File IO: Savefile write/read
 -Semaphores: To limit the amount of users entering dungeons.
 
+
 Data structures used:
 -Structs: to create various data info for characters, monsters , etc.
 -typedef: to sort out constants, may help with declaring an array of structs for a party.
 -Linked List: to keep track of skill growth/changes.
 
+
 Algorithms used:
 -Use sorts(binary?) to sort the order of stuff.
 -Search(binary?) to find stuff.
--Evolving AI algorithm: to make the AI smarter each time you challenge or we can just leave the AI in its initial state.
+
 
 Project Responsibilities:
-Ruochong:Chat system
-Ricky: Networking
-Kevin:Gameplay
-Matthew:AI 
+Networking - Kevin, Matthew
+Display terminal and Graphics - Ricky, Ruochong
+Piping and Connections- Ricky, Kevin 
+Gameplay(Longest part) - Ricky, Kevin, Ruochong, Matthew
+Chat and Command Terminal - Ruochong, Matthew
+
 
 
 TIMELINE:
 Interprocess backbone completion:1/14
 Intercomputer communication completion:1/14
-Input terminal completion:1/14
+Command terminal completion:1/14
 Display terminal completion:1/20
 Combat prototype completion:1/20
 Balancing + Additional gameplay completion:1/20
 Additional features completion:1/23
-
+Bug fixes: Project Due Date
 
 
 MECHANICS MECHANICS PLANNED
     -Party System
         -Players can form parties in the lobby
         -Party leader has the party powers: kick, delegate, etc.
+	 -Party leader creates password that other members need to join
 
     -Ready System
         -The party leader can enter the dungeon after all the players are ready
 
-    -Friend System(perhaps)
-
     -Dungeon-based Experience
-        -dungeons will be replayable
+        -when a party loses, they will have the opportunity to change up their passives and replay the dungeon
         -the player must beat the lower-difficulty dungeons to access more difficult ones
 
     -Progression
         -Players will get stronger through their SKILLS
         -There are no LEVELS or STATS
+	-Players will have class-specific passives they can choose to change in between dungeons
         -We may take this in two different directions
             -Mastery System in which players can use and switch between any skills (in Lobby)
             -Path System in which players choose to upgrade their skills at junctions (loses other option)
