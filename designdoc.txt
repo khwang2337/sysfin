@@ -37,26 +37,33 @@ Class topics used:
 -Handshake: Establishing/Verifying connections between two terminal sessions and network connection between players
 -String parsing: To parse input commands in input window
 -File IO: Savefile write/read
+-Semaphores: To limit the amount of users entering dungeons.
 
 Data structures used:
+-Structs: to create various data info for characters, monsters , etc.
+-typedef: to sort out constants, may help with declaring an array of structs for a party.
+-Linked List: to keep track of skill growth/changes.
 
 Algorithms used:
+-Use sorts(binary?) to sort the order of stuff.
+-Search(binary?) to find stuff.
+-Evolving AI algorithm: to make the AI smarter each time you challenge or we can just leave the AI in its initial state.
 
 Project Responsibilities:
-Ruochong:
-Ricky
-Kevin:
-Matthew
+Ruochong:Chat system
+Ricky: Networking
+Kevin:Gameplay
+Matthew:AI 
 
 
 TIMELINE:
-Interprocess backbone completion:
-Intercomputer communication completion:
-Input terminal completion:
-Display terminal completion:
-Combat prototype completion:
-Balancing + Additional gameplay completion:
-Additional features completion:
+Interprocess backbone completion:1/14
+Intercomputer communication completion:1/14
+Input terminal completion:1/14
+Display terminal completion:1/20
+Combat prototype completion:1/20
+Balancing + Additional gameplay completion:1/20
+Additional features completion:1/23
 
 
 
