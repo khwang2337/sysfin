@@ -1,0 +1,82 @@
+SYSTEMS LEVEL PROGRAMMING FINAL PROJECT DESIGN DOCUMENT
+RICKY WU, KEVIN HWANG, MATTHEW ZHU, RUOCHONG WU
+
+NETWORKED-RPG
+A text based Role Playing Game with a networked multiplayer system that connects 4 players together to engage in cooperative gameplay against computer controlled obstacles
+
+
+USER INTERFACE
+All user interaction is performed through terminal windows, no GUI planned.
+Two main elements of the user experience
+-A terminal session where a player can chat with other party members or input commands
+    a)The program will recognize a command by checking if there is a special character in the first index of the input (such as a colon)
+    b)Inputs without special characters will print as a normal message
+        Example:
+        Ricky types "heal me"
+        Kevin types "no"
+        Kevin types "/use 1 2"
+        Ricky types "i hate you"
+
+        Display:
+        [Ricky] heal me
+        [Kevin] no
+        <Kevin> used Heal on <Matthew>!
+        [Ricky] i hate you
+
+-A terminal session that displays sprites, player statistics, and move choices
+    a)Will be linked to the chat terminal through PIPES
+    b)Utilizes a HANDSHAKE to make sure the two terminals are connected
+    c)Makes decisions based on the output received from the chat terminal
+
+
+TECHNICAL DESIGN
+Class topics used:
+-Process interaction: To setup the processes when starting the game
+-Pipes: To connect the input and display terminal sessions
+-Networking: To communicate game information between each player
+-Handshake: Establishing/Verifying connections between two terminal sessions and network connection between players
+-String parsing: To parse input commands in input window
+-File IO: Savefile write/read
+
+Data structures used:
+
+Algorithms used:
+
+Project Responsibilities:
+Ruochong:
+Ricky
+Kevin:
+Matthew
+
+
+TIMELINE:
+Interprocess backbone completion:
+Intercomputer communication completion:
+Input terminal completion:
+Display terminal completion:
+Combat prototype completion:
+Balancing + Additional gameplay completion:
+Additional features completion:
+
+
+
+MECHANICS MECHANICS PLANNED
+    -Party System
+        -Players can form parties in the lobby
+        -Party leader has the party powers: kick, delegate, etc.
+
+    -Ready System
+        -The party leader can enter the dungeon after all the players are ready
+
+    -Friend System(perhaps)
+
+    -Dungeon-based Experience
+        -dungeons will be replayable
+        -the player must beat the lower-difficulty dungeons to access more difficult ones
+
+    -Progression
+        -Players will get stronger through their SKILLS
+        -There are no LEVELS or STATS
+        -We may take this in two different directions
+            -Mastery System in which players can use and switch between any skills (in Lobby)
+            -Path System in which players choose to upgrade their skills at junctions (loses other option)
