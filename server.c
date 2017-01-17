@@ -11,9 +11,10 @@ void sub_server( int sd );
 int main() {
 
   int sd, connection;
+  int count = 0;
 
   sd = server_setup();
-    
+
   while (1) {
 
     connection = server_connect( sd );
@@ -23,7 +24,7 @@ int main() {
 
       close(sd);
       sub_server( connection );
-
+      count +=1;
       exit(0);
     }
     else {
@@ -35,15 +36,16 @@ int main() {
 
 
 void sub_server( int sd ) {
+  char cname[MESSAGE_BUFFER_SIZE];
+  read(sd, cname, sizeof(cname));
+  printf("%s connected\n",cname);
 
   char buffer[MESSAGE_BUFFER_SIZE];
   while (read( sd, buffer, sizeof(buffer) )) {
-
-    printf("[SERVER %d] received: %s\n", getpid(), buffer );
+    printf("[SERVER %d] from %s received: %s\n", getpid(), cname, buffer );
     process( buffer );
-    write( sd, buffer, sizeof(buffer));    
+    write( sd, buffer, sizeof(buffer));
   }
-  
 }
 void process( char * s ) {
 
