@@ -36,13 +36,14 @@ int main() {
 
 
 void sub_server( int sd ) {
-  char cname[MESSAGE_BUFFER_SIZE];
-  read(sd, cname, sizeof(cname));
-  printf("%s connected\n",cname);
+  struct character player;
+  // char cname[MESSAGE_BUFFER_SIZE];
+  read(sd, &player, sizeof(player));
+  printf("%s connected\n",player.cname);
 
   char buffer[MESSAGE_BUFFER_SIZE];
   while (read( sd, buffer, sizeof(buffer) )) {
-    printf("[SERVER %d] from %s received: %s\n", getpid(), cname, buffer );
+    printf("[SERVER %d] from %s received: %s\n", getpid(), player.cname, buffer );
     process( buffer );
     write( sd, buffer, sizeof(buffer));
   }

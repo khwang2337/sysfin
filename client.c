@@ -17,14 +17,16 @@ int main( int argc, char *argv[] ) {
 
   int sd;
 
-  char cname[MESSAGE_BUFFER_SIZE];  //client name
+  struct character player;
+
+  // char cname[MESSAGE_BUFFER_SIZE];  //client name
   printf("enter client name: ");
-  fgets( cname, sizeof(cname),stdin);
+  fgets( player.cname, sizeof(player.cname),stdin);
 
   sd = client_connect( host);
 
   char buffer[MESSAGE_BUFFER_SIZE];
-  write(sd, cname, sizeof(cname));
+  write(sd, &player, sizeof(player));
 
   while (1) {
 
