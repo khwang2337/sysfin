@@ -23,6 +23,21 @@ int main( int argc, char *argv[] ) {
   printf("enter client name: ");
   fgets( player.cname, sizeof(player.cname),stdin);
 
+  printf("Choose your class:\n Knight \n Mage\n");
+
+  fgets( player.pclass, sizeof(player.pclass),stdin);
+
+  if(!strcmp(player.pclass, "Knight")){
+    player.hp = 100;
+    player.mp = 50;
+    printf("knight chosen\n");
+  }
+  if(!strcmp(player.pclass, "Mage")){
+    player.hp = 50;
+    player.mp = 100;
+    printf("mage chosen\n");
+  }
+
   sd = client_connect( host);
 
   char buffer[MESSAGE_BUFFER_SIZE];
