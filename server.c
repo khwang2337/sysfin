@@ -79,7 +79,7 @@ int checkAV(char * name) {
   if (token != EOF) {
     NAME[pos++] = token;
     while (token != EOF); {
-      while (token = getc(acc) != ',' && token != EOF) NAME[pos++] = token;
+      while (token = getc(acc) != ' ' && token != EOF) NAME[pos++] = token;
       if (strcmp(name, NAME)) return 0;
       while (token = getc(acc) != '\n' && token != EOF); 
       pos = 0;
