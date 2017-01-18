@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #include "networking.h"
 
@@ -34,6 +35,33 @@ int main() {
   return 0;
 }
 
+void registerr(int sd, struct character player) {
+  char buffer[MESSAGE_BUFFER_SIZE]; //name buffer
+  char * name;
+  int check = 1; //while conditional
+  while (check) { //checks conditional
+    write(sd, "user", 5); //sends message to client telling it to prompt
+    read(sd, buffer, MESSAGE_BUFFER_SIZE); //read name the client sends
+    if ( checkAV(buffer) ) { //checks availability
+      check = 0; //if available, end loop
+    }
+  }// else continue asking for name
+  strcpy(name, buffer);
+  
+  write(sd, "pass", 5);
+  read(sd, buffer, MESSAGE_BUFFER_SIZE);
+  int fd = open(name, O_WRONLY, 0);
+  write(fd, buffer, strlen(buffer) - 1); //we want newline
+  
+  
+}
+
+int checkAV(char * name) { 
+  chdir("accounts/");
+  int fd = open(name, O_CREAT | O_EXCL, 0644);
+  if (fd == -1) return 0;
+  else return 1;
+}
 
 void sub_server( int sd ) {
   struct character player;
@@ -52,41 +80,12 @@ void sub_server( int sd ) {
   char buffer[MESSAGE_BUFFER_SIZE];
   
   read(sd, buffer, MESSAGE_BUFFER_SIZE);
-  if (! strcmp(buffer,"yes")) login(sd); //does login procedure
-  else registerr(sd); //does register procedure
+  if (! strcmp(buffer,"yes")) printf("login\n"); //does login procedure
+  else registerr(sd, player); //does register procedure
   
   
 }
 
-void registerr(int sd, struct character player) {
-  char name[MESSAGE_BUFFER_SIZE]; //name buffer
-  int check = 1; //while conditional
-  while (check) { //checks conditional
-    write(sd, "send", 5); //sends message to client telling it to prompt
-    read(sd, name, MESSAGE_BUFFER_SIZE); //read name the client sends
-    if ( checkAV(name) ) { //checks availability
-      check = 0; //if available, end loop
-    }
-  }// else continue asking for name
-  
-}
-
-int checkAV(char * name) {
-  char NAME[MESSAGE_BUFFER_SIZE]; //account name buffer
-  int pos = 0; //pos for char
-  FILE *acc = fopen("accounts", "r"); //open file stream
-  char token = getc(acc); //gets the first char
-  if (token != EOF) { //checks if first char is EOF, if so return 1
-    NAME[pos++] = token; //else put char at start of NAME
-    while (token != EOF); { //conditional for EOF
-      while (token = getc(acc) != ' ' && token != EOF) NAME[pos++] = token; //adds chars into NAME until the first space or EOF (not really expecting an EOF)
-      if (! strcmp(name, NAME)) return 0; //check name if name already exists, return 0
-      while (token = getc(acc) != '\n' && token != EOF); //pushes token past \n or EOF
-      pos = 0; //resets pos
-    }
-  } 
-  return 1; //either first token is EOF or name is not in file, good to go
-}
 
 
 void process( char * s ) {
@@ -98,5 +97,5 @@ void process( char * s ) {
 }
 
 //THESE WILL HAVE TO BE USED CRUCIALLY FOR SAVE PROGRESS AND COMMUNICATION
-char * convertS(struct character player); //converts player struct to a string we can right into accounts
+char * convertS(struct character player); //converts player struct to a string we can write into accounts
 void convertC(struct character player); //converts string to player struct
