@@ -1,13 +1,14 @@
 #ifndef NETWORKING_H
 #define NETWORKING_H
 
-#define MESSAGE_BUFFER_SIZE 1000
+#define MESSAGE_BUFFER_SIZE 50
 
-struct character{
+struct character {
   char cname[MESSAGE_BUFFER_SIZE];
+  char pclass[MESSAGE_BUFFER_SIZE];
   int hp;
   int mp;
-  char pclass[MESSAGE_BUFFER_SIZE];
+  
 };
 
 // #define PLAYER_SIZE (MESSAGE_BUFFER_SIZE+ (sizeof(int)*3))

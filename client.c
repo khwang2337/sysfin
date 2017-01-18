@@ -20,13 +20,14 @@ int main( int argc, char *argv[] ) {
   struct character player;
 
   // char cname[MESSAGE_BUFFER_SIZE];  //client name
-  printf("enter client name: ");
-  fgets( player.cname, sizeof(player.cname),stdin);
+  //printf("enter client name: ");
+  //fgets( player.cname, sizeof(player.cname),stdin);
 
-  printf("Choose your class:\n Knight \n Mage\n");
+  //printf("Choose your class:\n Knight \n Mage\n");
 
-  fgets( player.pclass, sizeof(player.pclass),stdin);
+  //fgets( player.pclass, sizeof(player.pclass),stdin);
 
+/*
   if(!strcmp(player.pclass, "Knight")){
     player.hp = 100;
     player.mp = 50;
@@ -37,13 +38,32 @@ int main( int argc, char *argv[] ) {
     player.mp = 100;
     printf("mage chosen\n");
   }
+*/
 
   sd = client_connect( host);
-
   char buffer[MESSAGE_BUFFER_SIZE];
-  write(sd, &player, sizeof(player));
-
-  while (1) {
+  //char * input = buffer;
+  int check = 1;
+  
+  while (check) { //ask client if they have an account
+    printf("Do you already have an account? Enter yes or no: ");
+    fgets(buffer, MESSAGE_BUFFER_SIZE, stdin);
+    if ( buffer[strlen(buffer) - 1] != '\n' ) { //checks for out of bounds
+        printf("Error: Out of bounds; character limit is %d\n", MESSAGE_BUFFER_SIZE - 1); 
+        int clear;
+        while ( (clear = getchar()) != '\n' && clear != EOF); //clears stdin
+    }
+    else {
+      buffer[ strlen(buffer) - 1 ] = 0; //replaces newline
+      if ( (! strcmp(buffer,"yes")) || (! strcmp(buffer,"no")) ) {
+        write(sd, buffer, strlen(buffer));
+        check = 0;
+      }
+    }
+  }
+  //write(sd, &player, sizeof(player));
+  
+  /*while (1) {
 
     printf("enter message: ");
     fgets( buffer, sizeof(buffer), stdin );
@@ -53,7 +73,7 @@ int main( int argc, char *argv[] ) {
     write( sd, buffer, sizeof(buffer) );
     read( sd, buffer, sizeof(buffer) );
     printf( "received: %s\n", buffer );
-  }
+  }*/
 
   return 0;
 }

@@ -38,6 +38,7 @@ int main() {
 void sub_server( int sd ) {
   struct character player;
   // char cname[MESSAGE_BUFFER_SIZE];
+  /*
   read(sd, &player, sizeof(player));
   printf("%s connected\n",player.cname);
 
@@ -47,7 +48,51 @@ void sub_server( int sd ) {
     process( buffer );
     write( sd, buffer, sizeof(buffer));
   }
+  */
+  char buffer[MESSAGE_BUFFER_SIZE];
+  
+  read(sd, buffer, MESSAGE_BUFFER_SIZE);
+  if (! strcmp(buffer,"yes")) login(sd); //does login procedure
+  else registerr(sd); //does register procedure
+  
+  
 }
+
+void registerr(int sd, struct character player) {
+  char name[MESSAGE_BUFFER_SIZE];
+  int check = 1;
+  while (check) {
+    write(sd, "send", 5);
+    read(sd, name, MESSAGE_BUFFER_SIZE);
+    if ( checkAV(name) ) {
+      check = 0;
+    }
+  }
+  
+}
+
+int checkAV(char * name) {
+  //FILE *f = fopen("file.txt", "r");
+  //int c;
+  //while ((c = getc(f)) != '#' && c != EOF)
+  //  putchar(c);
+  char NAME[MESSAGE_BUFFER_SIZE];
+  int pos = 0;
+  FILE *acc = fopen("accounts", "r");
+  char token = getc(acc);
+  if (token != EOF) {
+    NAME[pos++] = token;
+    while (token != EOF); {
+      while (token = getc(acc) != ',' && token != EOF) NAME[pos++] = token;
+      if (strcmp(name, NAME)) return 0;
+      while (token = getc(acc) != '\n' && token != EOF); 
+      pos = 0;
+    }
+  }
+  return 1;
+}
+
+
 void process( char * s ) {
 
   while ( *s ) {
@@ -55,3 +100,5 @@ void process( char * s ) {
     s++;
   }
 }
+
+char * convert(struct character player);
