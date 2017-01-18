@@ -29,6 +29,11 @@
   }
   return checker;
   }*/
+int checkSYM(char * word) {
+  strsep(&word, " !@#$^&*()_-+={[}]|\\:;\"\'<>?,./~`%");
+  return word == 0;
+}
+
 int main( int argc, char *argv[] ) {
 
   char *host;
@@ -89,16 +94,34 @@ int main( int argc, char *argv[] ) {
   while (check) {
     read(sd, buffer, MESSAGE_BUFFER_SIZE);
     if (! strcmp(buffer, "user")) {
-      printf("what is your preferred username?: ");
-      fgets(buffer, MESSAGE_BUFFER_SIZE, stdin);
-      buffer[ strlen(buffer) - 1] = 0;
-      write(sd, buffer, MESSAGE_BUFFER_SIZE);
+      while (check) {
+        if (check == 2) printf("Too Short! Must be more than 5 characters!\n");
+        if (check == 3) printf("Invalid symbol used!\n");
+        printf("Preferred username: ");
+        fgets(buffer, MESSAGE_BUFFER_SIZE, stdin);
+        buffer[ strlen(buffer) - 1] = 0;
+        if (strlen(buffer) <= 5) check = 2;
+        else if (! checkSYM(buffer)) check = 3;
+        else {
+          write(sd, buffer, MESSAGE_BUFFER_SIZE);
+          check = 0;
+        }
+      }
+      check = 1;
     }
     else if (! strcmp(buffer, "pass")) {
-      printf("what is your preferred password?: ");
-      fgets(buffer, MESSAGE_BUFFER_SIZE, stdin);
-      write(sd, buffer, MESSAGE_BUFFER_SIZE);
-      check = 0;
+      while (check) {
+        if (check == 2) printf("Too Short! Must be more than 5 characters!\n");
+        if (check == 3) printf("Invalid symbol used!\n");
+        printf("Preferred password?: ");
+        fgets(buffer, MESSAGE_BUFFER_SIZE, stdin);
+        if (strlen(buffer) <= 5) check = 2;
+        else if (! checkSYM(buffer)) check = 3;
+        else {
+          write(sd, buffer, MESSAGE_BUFFER_SIZE);
+          check = 0;
+        }
+      }
     }
   }
   
