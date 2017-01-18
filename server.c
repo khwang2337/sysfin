@@ -72,10 +72,6 @@ void registerr(int sd, struct character player) {
 }
 
 int checkAV(char * name) {
-  //FILE *f = fopen("file.txt", "r");
-  //int c;
-  //while ((c = getc(f)) != '#' && c != EOF)
-  //  putchar(c);
   char NAME[MESSAGE_BUFFER_SIZE];
   int pos = 0;
   FILE *acc = fopen("accounts", "r");
