@@ -88,18 +88,21 @@ int main( int argc, char *argv[] ) {
   check = 1;
   while (check) {
     read(sd, buffer, MESSAGE_BUFFER_SIZE);
-    if (strcmp(buffer, "user")) {
+    if (! strcmp(buffer, "user")) {
       printf("what is your preferred username?: ");
       fgets(buffer, MESSAGE_BUFFER_SIZE, stdin);
       buffer[ strlen(buffer) - 1] = 0;
       write(sd, buffer, MESSAGE_BUFFER_SIZE);
     }
-    else {
+    else if (! strcmp(buffer, "pass")) {
       printf("what is your preferred password?: ");
       fgets(buffer, MESSAGE_BUFFER_SIZE, stdin);
       write(sd, buffer, MESSAGE_BUFFER_SIZE);
+      check = 0;
     }
   }
+  
+  
   
   //write(sd, &player, sizeof(player));
   

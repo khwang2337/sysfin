@@ -36,22 +36,24 @@ int main() {
 }
 
 void registerr(int sd, struct character player) {
-  char buffer[MESSAGE_BUFFER_SIZE]; //name buffer
-  char * name;
+  char name[MESSAGE_BUFFER_SIZE]; //name buffer
+  char buffer[MESSAGE_BUFFER_SIZE];
   int check = 1; //while conditional
+  
   while (check) { //checks conditional
     write(sd, "user", 5); //sends message to client telling it to prompt
-    read(sd, buffer, MESSAGE_BUFFER_SIZE); //read name the client sends
-    if ( checkAV(buffer) ) { //checks availability
+    read(sd, name, MESSAGE_BUFFER_SIZE); //read name the client sends
+    if ( checkAV(name) ) { //checks availability
+      printf("Username: %s is available\n", name);
       check = 0; //if available, end loop
     }
   }// else continue asking for name
-  strcpy(name, buffer);
   
   write(sd, "pass", 5);
   read(sd, buffer, MESSAGE_BUFFER_SIZE);
   int fd = open(name, O_WRONLY, 0);
-  write(fd, buffer, strlen(buffer) - 1); //we want newline
+  write(fd, buffer, strlen(buffer)); //we want newline
+  
   
   
 }
