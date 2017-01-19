@@ -35,6 +35,15 @@ int main() {
   return 0;
 }
 
+int checkUSER(char * name, int num) { 
+  chdir("accounts/");
+  int fd;
+  if (num) fd = open(name, O_RDWR, 0);
+  else fd = open(name, O_CREAT | O_EXCL, 0644);
+  if (fd == -1) return 0;
+  else return 1;
+}
+
 void registerr(int sd, struct character player) {
   char name[MESSAGE_BUFFER_SIZE]; //name buffer
   char buffer[MESSAGE_BUFFER_SIZE];
@@ -58,14 +67,6 @@ void registerr(int sd, struct character player) {
   
 }
 
-int checkUSER(char * name, int num) { 
-  chdir("accounts/");
-  int fd;
-  if (num) fd = open(name, O_RDWR, 0);
-  else fd = open(name, O_CREAT | O_EXCL, 0644);
-  if (fd == -1) return 0;
-  else return 1;
-}
 
 void login(int sd, struct character player) {
   char buffer[MESSAGE_BUFFER_SIZE];
@@ -94,7 +95,18 @@ void login(int sd, struct character player) {
 }
 
 int checkPASS(char * name, char * pass) {
-  
+  FILE * fp = fopen(name, "r");
+  if (fp == NULL) return 0;
+  else {
+    char buffer[MESSAGE_BUFFER_SIZE];
+    char token;
+    char pos = 0;
+    while (token = getchar(fp) != '\n' && token != EOF) {
+      buffer[pos++];
+    }
+    buffer[pos] = 0;
+    return strcmp(buffer, pass);
+  }
 }
 
 void sub_server( int sd ) {
