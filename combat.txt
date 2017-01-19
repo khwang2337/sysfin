@@ -3,8 +3,8 @@ TABLE OF CONTENTS
 1.Backbone Structure
 2.Damage formula
 3.Psuedocode
-
-
+4.Skill System
+5.Ability System
 
 ————————————————————————BACKBONE STRUCTURE————————————————————————————
 
@@ -46,6 +46,8 @@ _MOVE_ELEMENT
 -DEFDEB_TURN
 -MDEFDEB
 -MDEFDEB_TURN
+-SPDDEB
+-SPDDEB_TURN
 
 //Buffs
 -ATKBUFF
@@ -67,6 +69,8 @@ _MOVE_ELEMENT
 
 (USED BY PLAYERS ONLY)
 -CLASS_ID 
+
+*Everything is set to zero until a player chooses a class and battles
 
 ————————————————————————————DAMAGE FORMULA——————————————————————————————————
 
@@ -106,15 +110,21 @@ Enemy getMonster(int ID){
 //Dungeon system? Not sure how to do this with networking
 int dungeons(Player party[]){
 	dungeonID = 1;
-	int easy[10] = {ID of monsters x 10}
-	int medium[10] = {ID of monsters x 10}
-	int hard[10] = {ID of monsters x 10}
+	int easy[12] = {ID of monsters x 10}
+	int medium[12] = {ID of monsters x 10}
+	int hard[12] = {ID of monsters x 10}
 
 	int level = 0;
 	while (dungeonID == 1){
-		if (!fight(party,easy[level])) level++;
-		else if (level == 10) dungeon++;
-		else level = 0;
+		if (level == 12) dungeon++; 
+		else if (!fight(party,easy[level])){ 			
+			if (!level%3) levelup(party[], level/3);	//You level up every 3 fights (every 3rd fight is a "boss")
+			level++;
+		else {
+			resetskills(party,level);
+			level = 0;					//You fail and have to restart dungeon
+			printf("You failed hahahahhahahahhahhaha");
+		}
 	}
 	//dungeon 2
 	//dungeon 3
@@ -125,6 +135,8 @@ int fight(Player party[], enemy horde[]){
 	get the SPD for each enemy
 	enemies will go every SPD turns
 	Ex: if an enemy has SPD = 3, then 3 players will attack before enemy attacks
+	enemy chooses target by randomly picking a target from an array
+	int target[] = [1,1,2,2,3,3,4,4] 
 
 	*processes commands
 	Ex: use 1 2
@@ -146,8 +158,44 @@ int process(Player player, Player party[], Enemy horde[], int move, int target){
 	if AOE:
 		loop through party and apply single target damage to all;
 }
-		 
 
+————————————————————————————————ABILITY SYSTEM——————————————————————————————————
+
+Skill Method:
+
+int attack(player, target, move){
+	check player's class;
+	decrease all the timers on debuff and buffs for both player and target(if a timer reaches zero, turn buff/debuff back to 0)
+	decrease timers on stun and poison
+	
+	if (class == 1){						//Let's pretend 1 is "Warrior"
+		 if (move == 1){					//This would be "Swing"
+		 	if (player.MOVE1_ID == 1) {			//This would be base skill
+				target.HP_LOST += formula(player.ATK,player.ATKBUFF,player.ATKDEB,100% (this is multiplier),target.DEF,target.DEFBUFF,target.DEFDEB)
+			}
+			if (player.MOVE1_ID == 2) {			//This would be branch 1 of first upgrade. "Swing Break"
+				target.HP_LOST += ......
+				target.DEFDEB = 20;
+				target.DEFDEB_TURNS = 3;
+			}
+			if player.MOVE1_ID == 3) {			//This would be branch 2 of first upgrade. "Heavy Swing"
+				target.HP_LOST += ......
+				//More damage or something
+			}
+			//ETC.
+	}
+	if (class == 2){
+		.....
+	}
+	.......
+}
+
+int levelup(player, level){
+	
+	
+	
+	
+				
 
 
 
