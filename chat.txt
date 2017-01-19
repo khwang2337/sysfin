@@ -1,0 +1,5 @@
+Chat
+    each forked server has their own sPID in character struct
+        client-servers communicate this way
+    
+        

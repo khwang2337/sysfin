@@ -82,6 +82,7 @@ void login(int sd, struct character player) {
     }
   }
   
+  check = 1;
   while (check) {
     write(sd, "password", 9);
     read(sd, buffer, MESSAGE_BUFFER_SIZE);
@@ -91,6 +92,7 @@ void login(int sd, struct character player) {
     }
   }
   
+  write(sd, "successful login", 17);
   
 }
 
@@ -101,7 +103,7 @@ int checkPASS(char * name, char * pass) {
     char buffer[MESSAGE_BUFFER_SIZE];
     char token;
     char pos = 0;
-    while (token = getchar(fp) != '\n' && token != EOF) {
+    while (token = getc(fp) != '\n' && token != EOF) {
       buffer[pos++];
     }
     buffer[pos] = 0;
@@ -126,7 +128,7 @@ void sub_server( int sd ) {
   char buffer[MESSAGE_BUFFER_SIZE];
   
   read(sd, buffer, MESSAGE_BUFFER_SIZE);
-  if (! strcmp(buffer,"yes")) printf("login\n"); //does login procedure
+  if (! strcmp(buffer,"yes")) login(sd, player); //does login procedure
   else registerr(sd, player); //does register procedure
   
   

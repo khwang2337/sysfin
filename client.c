@@ -117,7 +117,7 @@ int main( int argc, char *argv[] ) {
         if (check == 3) printf("Invalid symbol used!\n");
         printf("Preferred password?: ");
         fgets(buffer, MESSAGE_BUFFER_SIZE, stdin);
-        if (strlen(buffer) <= 5) check = 2;
+        if (strlen(buffer) <= 6) check = 2;
         else if (! checkSYM(buffer)) check = 3;
         else {
           write(sd, buffer, MESSAGE_BUFFER_SIZE);
@@ -129,7 +129,6 @@ int main( int argc, char *argv[] ) {
   
   while (check < 0) {
     read(sd, buffer, MESSAGE_BUFFER_SIZE);
-    
     if (! strcmp(buffer, "username")) {
       if (check == -2) printf("That username does not exist\n");
       printf("username: ");
