@@ -90,10 +90,12 @@ int main( int argc, char *argv[] ) {
       }
     }
   }
-  check = 1;
-  while (check) {
+  if (! strcmp(buffer, "yes")) check = -1;
+  else check = 1;
+  
+  while (check > 0) {
     read(sd, buffer, MESSAGE_BUFFER_SIZE);
-    if (! strcmp(buffer, "user")) {
+    if (! strcmp(buffer, "makeuser")) {
       while (check) {
         if (check == 2) printf("Too Short! Must be more than 5 characters!\n");
         if (check == 3) printf("Invalid symbol used!\n");
@@ -109,7 +111,7 @@ int main( int argc, char *argv[] ) {
       }
       check = 1;
     }
-    else if (! strcmp(buffer, "pass")) {
+    else if (! strcmp(buffer, "makepass")) {
       while (check) {
         if (check == 2) printf("Too Short! Must be more than 5 characters!\n");
         if (check == 3) printf("Invalid symbol used!\n");
@@ -125,7 +127,31 @@ int main( int argc, char *argv[] ) {
     }
   }
   
+  while (check < 0) {
+    read(sd, buffer, MESSAGE_BUFFER_SIZE);
+    
+    if (! strcmp(buffer, "username")) {
+      if (check == -2) printf("That username does not exist\n");
+      printf("username: ");
+      fgets(buffer, MESSAGE_BUFFER_SIZE, stdin);
+      buffer[strlen(buffer) - 1] = 0;
+      write(sd, buffer, MESSAGE_BUFFER_SIZE);
+      check = -2;
+    }
+    
+    else if (! strcmp(buffer, "password")) {
+      if (check == -3) printf("That password does not exist\n");
+      printf("password: ");
+      fgets(buffer, MESSAGE_BUFFER_SIZE, stdin);
+      buffer[strlen(buffer) - 1] = 0;
+      write(sd, buffer, MESSAGE_BUFFER_SIZE);
+      check = -3;
+    }
+    
+    else break; //check = 0;
+  }
   
+  printf("Successful Login!\n");
   
   //write(sd, &player, sizeof(player));
   

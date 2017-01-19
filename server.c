@@ -41,28 +41,60 @@ void registerr(int sd, struct character player) {
   int check = 1; //while conditional
   
   while (check) { //checks conditional
-    write(sd, "user", 5); //sends message to client telling it to prompt
+    write(sd, "makeuser", 9); //sends message to client telling it to prompt
     read(sd, name, MESSAGE_BUFFER_SIZE); //read name the client sends
-    if ( checkAV(name) ) { //checks availability
+    if ( checkUSER(name, 0) ) { //checks availability
       printf("Username: %s is available\n", name);
       check = 0; //if available, end loop
     }
   }// else continue asking for name
   
-  write(sd, "pass", 5);
+  write(sd, "makepass", 9);
   read(sd, buffer, MESSAGE_BUFFER_SIZE);
   int fd = open(name, O_WRONLY, 0);
   write(fd, buffer, strlen(buffer)); //we want newline
   
+  //REST WILL BE FILLED IN
+  
+}
+
+int checkUSER(char * name, int num) { 
+  chdir("accounts/");
+  int fd;
+  if (num) fd = open(name, O_RDWR, 0);
+  else fd = open(name, O_CREAT | O_EXCL, 0644);
+  if (fd == -1) return 0;
+  else return 1;
+}
+
+void login(int sd, struct character player) {
+  char buffer[MESSAGE_BUFFER_SIZE];
+  char name[MESSAGE_BUFFER_SIZE];
+  int check = 1;
+  
+  while (check) {
+    write(sd, "username", 9);
+    read(sd, name, MESSAGE_BUFFER_SIZE);
+    if ( checkUSER(name, 1) ) {
+      printf("username accepted\n");
+      check = 0;
+    }
+  }
+  
+  while (check) {
+    write(sd, "password", 9);
+    read(sd, buffer, MESSAGE_BUFFER_SIZE);
+    if ( checkPASS(name, buffer) ) {
+      printf("password accepted");
+      check = 0;
+    }
+  }
   
   
 }
 
-int checkAV(char * name) { 
-  chdir("accounts/");
-  int fd = open(name, O_CREAT | O_EXCL, 0644);
-  if (fd == -1) return 0;
-  else return 1;
+int checkPASS(char * name, char * pass) {
+  
 }
 
 void sub_server( int sd ) {
