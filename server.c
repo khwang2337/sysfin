@@ -67,6 +67,22 @@ void registerr(int sd, struct character player) {
   
 }
 
+int checkPASS(char * name, char * pass) {
+  FILE * fp = fopen(name, "r");
+  if (fp == NULL) return 0;
+  else {
+    char buffer[MESSAGE_BUFFER_SIZE];
+    char token;
+    char pos = 0;
+    rewind(fp);
+    while ( (token = getc(fp)) != '\n' && token != EOF) {
+      buffer[pos++] = token;
+    }
+    buffer[pos] = 0;
+    if (! strcmp(buffer, pass)) return 1;
+    else return 0;
+  }
+}
 
 void login(int sd, struct character player) {
   char buffer[MESSAGE_BUFFER_SIZE];
@@ -94,21 +110,6 @@ void login(int sd, struct character player) {
   
   write(sd, "successful login", 17);
   
-}
-
-int checkPASS(char * name, char * pass) {
-  FILE * fp = fopen(name, "r");
-  if (fp == NULL) return 0;
-  else {
-    char buffer[MESSAGE_BUFFER_SIZE];
-    char token;
-    char pos = 0;
-    while (token = getc(fp) != '\n' && token != EOF) {
-      buffer[pos++];
-    }
-    buffer[pos] = 0;
-    return strcmp(buffer, pass);
-  }
 }
 
 void sub_server( int sd ) {
