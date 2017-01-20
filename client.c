@@ -5,30 +5,6 @@
 
 #include "networking.h"
 
-/*void createAccount(char* user,char*pass){ //Should be a small easy example of 
-  int f = open("accounts",O_WRONLY);        //an account creation.
-  //char * emptybuff[2] = {"\n"};
-  write(f,user,sizeof(user));
-  write(f,pass,sizeof(pass));
-  close(f);
-  }*/
-/*int * authenticate(char * user, char *pass){//basic log in process
-  char buffer[255];                           //Need better process
-  char buffer2[255];
-  FILE *f = fopen("accounts","rt");
-  int checker = 0;
-  while(fgets(buffer,255,f)!= NULL){
-    buffer[strlen(buffer)-1]='\0';
-    if(!strcmp(user,buffer)){
-      fgets(buffer2,255,f);
-      buffer2[strlen(buffer2)-1] ='\0';
-      if(!strcmp(pass,buffer2)){
-	checker = 1;
-      }
-    }
-  }
-  return checker;
-  }*/
 int checkSYM(char * word) {
   strsep(&word, " !@#$^&*()_-+={[}]|\\:;\"\'<>?,./~`%");
   return word == 0;
@@ -48,26 +24,6 @@ int main( int argc, char *argv[] ) {
 
   struct character player;
 
-  // char cname[MESSAGE_BUFFER_SIZE];  //client name
-  //printf("enter client name: ");
-  //fgets( player.cname, sizeof(player.cname),stdin);
-
-  //printf("Choose your class:\n Knight \n Mage\n");
-
-  //fgets( player.pclass, sizeof(player.pclass),stdin);
-
-/*
-  if(!strcmp(player.pclass, "Knight")){
-    player.hp = 100;
-    player.mp = 50;
-    printf("knight chosen\n");
-  }
-  if(!strcmp(player.pclass, "Mage")){
-    player.hp = 50;
-    player.mp = 100;
-    printf("mage chosen\n");
-  }
-*/
 
   sd = client_connect( host);
   char buffer[MESSAGE_BUFFER_SIZE];
@@ -152,7 +108,32 @@ int main( int argc, char *argv[] ) {
   
   printf("Successful Login!\n");
   
-  //write(sd, &player, sizeof(player));
+  
+  return 0;
+}
+
+// char cname[MESSAGE_BUFFER_SIZE];  //client name
+  //printf("enter client name: ");
+  //fgets( player.cname, sizeof(player.cname),stdin);
+
+  //printf("Choose your class:\n Knight \n Mage\n");
+
+  //fgets( player.pclass, sizeof(player.pclass),stdin);
+
+/*
+  if(!strcmp(player.pclass, "Knight")){
+    player.hp = 100;
+    player.mp = 50;
+    printf("knight chosen\n");
+  }
+  if(!strcmp(player.pclass, "Mage")){
+    player.hp = 50;
+    player.mp = 100;
+    printf("mage chosen\n");
+  }
+*/
+
+//write(sd, &player, sizeof(player));
   
   /*while (1) {
 
@@ -166,5 +147,3 @@ int main( int argc, char *argv[] ) {
     printf( "received: %s\n", buffer );
   }*/
 
-  return 0;
-}

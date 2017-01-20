@@ -113,18 +113,7 @@ int checkPASS(char * name, char * pass) {
 
 void sub_server( int sd ) {
   struct character player;
-  // char cname[MESSAGE_BUFFER_SIZE];
-  /*
-  read(sd, &player, sizeof(player));
-  printf("%s connected\n",player.cname);
 
-  char buffer[MESSAGE_BUFFER_SIZE];
-  while (read( sd, buffer, sizeof(buffer) )) {
-    printf("[SERVER %d] from %s received: %s\n", getpid(), player.cname, buffer );
-    process( buffer );
-    write( sd, buffer, sizeof(buffer));
-  }
-  */
   char buffer[MESSAGE_BUFFER_SIZE];
   
   read(sd, buffer, MESSAGE_BUFFER_SIZE);
@@ -147,3 +136,16 @@ void process( char * s ) {
 //THESE WILL HAVE TO BE USED CRUCIALLY FOR SAVE PROGRESS AND COMMUNICATION
 char * convertS(struct character player); //converts player struct to a string we can write into accounts
 void convertC(struct character player); //converts string to player struct
+
+// char cname[MESSAGE_BUFFER_SIZE];
+  /*
+  read(sd, &player, sizeof(player));
+  printf("%s connected\n",player.cname);
+
+  char buffer[MESSAGE_BUFFER_SIZE];
+  while (read( sd, buffer, sizeof(buffer) )) {
+    printf("[SERVER %d] from %s received: %s\n", getpid(), player.cname, buffer );
+    process( buffer );
+    write( sd, buffer, sizeof(buffer));
+  }
+  */
