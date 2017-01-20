@@ -4,7 +4,8 @@ TABLE OF CONTENTS
 2.Damage formula
 3.Psuedocode
 4.Skill System
-5.Ability System
+5.All Moves
+6.Creative Part
 
 ————————————————————————BACKBONE STRUCTURE————————————————————————————
 
@@ -190,13 +191,70 @@ int attack(player, target, move){
 	.......
 }
 
-int levelup(player, level){
+int levelup(player, int ability){
+	int upgrade;
+	if (ability == 1) upgrade = player.MOVE1_ID;
+	if (ability == 2) upgrade = player.MOVE2_ID;
+	if (ability == 3) upgrade = player.MOVE3_ID;
+	if (ability == 4) upgrade = player.MOVE4_ID;
+	int choice1 = upgrade * 2;
+	int choice2 = upgrade * 2 + 1;
 	
-	
-	
-	
-				
+	//after choosing choice1/2
+	//will also print out statements (which will be stored somewhere)
+	set the player.MOVE#_ID to choice 1 or 2	
+}
 
+//If resetskills(player){
+	find player account file and replace all current values with those from the file
+}
+	
+	
+————————————————————————————————ABILITY SYSTEM——————————————————————————————————				
+//Try to make all choices balanced 
+
+Tank- defensive stats, low damage, team buffs
+	Shield Bash
+	1. ST 100% 
+		2. ST 130% 
+			4. ST 150% with 30% stun 
+				8. ST 150% with 70% stun 
+				9. ST 100% with 100% stun 
+			5. AOE 100% 
+				10. AOE 200% 
+				11. AOE 100% with 3 turn AOE 30% ATK buff 
+		3. ST 100% with 3 turn 20% DEF debuff 
+			6. ST 120% with 5 turn 30% DEF debuff 
+				12. AOE 100% with 3 turn 30% DEF debuff 
+				13. ST 130% with 5 turn 50% DEF debuff 
+			7. ST 120% with 5 turn 30% MDEF debuff 
+				14. AOE 100% with 3 turn 30% MDEF debuff 
+				15. ST 130% with 5 turn 50% MDEF debuff 
+	Protect
+	1. AOE 2 turn 20% DEF buff 
+		2. AOE 1 turn 70% DEF buff 
+			4. AOE 2 turn 70% DEF buff 
+				8. AOE 3 turn 70% DEF/MDEF buff  
+				9. AOE 5 turn 70% DEF buff  
+			5. AOE 1 turn 100% DEF buff 
+				10. AOE 1 turn 120% DEF/MDEF buff 
+				11. AOE 2 turn 120% DEF buff 
+		3. AOE 3 turn 20% DEF buff + 1 target stack  
+			6. AOE 3 turn 30% DEF buff + 2 target stack 
+				12. AOE 3 turn 30% DEF buff + 3 target stack  
+				13. AOE 3 turn 30% DEF/MDEF buff + 2 target stack
+			7. AOE 3 turn 30% DEF/MDEF buff + 1 target stack 
+				14. AOE 5 turn 50% DEF/MDEF buff + 1 target stack 
+				15. ST 100% with AOE 3 turn 50% DEF/MDEF buff + 1 target stack 
+		
+
+Warrior- balanced stats, medium damage, ST buffs and debuffs
+
+Mage- offensive magical stats, high damage, elemental coverage
+
+Hunter- offensive physical stats, high damage
+
+Healer- fragile stats, team buffs, team healing
 
 
 
