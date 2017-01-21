@@ -100,6 +100,10 @@ void loginC(int sd, char buffer[]) {
   
 }
 
+void chatSYS(); //does chat
+
+void ENDCUR(); //does graphical display and endcurses
+
 int main( int argc, char *argv[] ) {
 
   char *host;
@@ -124,6 +128,9 @@ int main( int argc, char *argv[] ) {
   
   printf("Welcome to the Game.\n");
   
+  /*int subPID = fork();
+  if (subPID) chatSYS();
+  else ENDCUR();*/
   
   return 0;
 }
