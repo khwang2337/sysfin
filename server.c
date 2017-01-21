@@ -112,7 +112,14 @@ void login(int sd, struct character player) {
   
 }
 
-void interpret(int sd, char * reception);
+void setup(struct character player);
+
+void interpret(int sd, struct character player) {
+  char buffer[MESSAGE_BUFFER_SIZE];
+  read(sd, buffer, MESSAGE_BUFFER_SIZE);
+  
+  //if statements
+}
 
 void sub_server( int sd ) {
   struct character player;
@@ -123,7 +130,9 @@ void sub_server( int sd ) {
   if (! strcmp(buffer,"yes")) login(sd, player); //does login procedure
   else registerr(sd, player); //does register procedure
   
-  while (1) interpret(sd, buffer);
+  setup(player);
+  
+  while (1) interpret(sd, player);
   
 }
 
