@@ -116,9 +116,6 @@ int main( int argc, char *argv[] ) {
 
   int sd;
 
-  struct character player;
-
-
   sd = client_connect( host);
   char buffer[MESSAGE_BUFFER_SIZE];
   //char * input = buffer;
