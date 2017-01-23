@@ -168,7 +168,7 @@ void command(int sd, char buffer[], character player) {
   if (! strcmp(command,"use")) {
     char * a = strsep(&buffer," ");
     char * b = strsep(&buffer," ");
-    //action(player, sd, buffer, a, b); //commented to try compiling
+    //action(player, sd, a, b); //commented to try compiling
   }
   else if (! strcmp(command, "createparty")) { //check in_party(or see if party_key) is 0, ftok create shared memory, set party_key
     //nt shmd = shmget(420, 1024, IPC_CREAT | 0664);
@@ -183,6 +183,10 @@ void command(int sd, char buffer[], character player) {
       player.Party.mate1.does_exist = 0;
       player.Party.mate2.does_exist = 0;
       player.Party.mate3.does_exist = 0;
+      strcpy(player.Party.mate1.name, "lol");
+      strcpy(player.Party.mate2.name, "lol");
+      strcpy(player.Party.mate3.name, "lol");
+      
       write(sd, "3 [SERVER]: Party has been successfully created", 48);
     }
     else write(sd, "3 [SERVER]: You are already in a party", 39);
@@ -245,7 +249,8 @@ void command(int sd, char buffer[], character player) {
     else write(sd, "3 [Server]: You must be in a party to ready", 44);
   }
   else if (! strcmp(command, "start")) { //if leader and all ready, start
-    if (player.in_party && (! strcmp(player.Party.leader_name, player.cname) && player.Party.mate1.does_exist)
+    if (player.in_party && (! strcmp(player.Party.leader_name, player.cname) && (player.Party.mate1.does_exist && ) )
+    //existTRUE - checkREADY //existFALSE - noCheck
   }
 }
 
@@ -266,8 +271,9 @@ void chat(int sd, char buffer[], character player) {
   else if (buffer[0] == '1') {
     //if (! player.in_party) write(sd, ) //DO IN CLIENT
     //sscanf(buffer, "%d %s", mode, temp);
+    //CHECK IF PLAYER IS IN A PARTY!!!
     mode = strsep(&buffer, " ");
-    sprintf(MEM, "%s/%s/%s %s %s %s /%s", mode, player.cname, player.Party.leader.name, player.Party.mate1.name, player.Party.mate2.name, player.Party.mate3.name, buffer);  //kk
+    sprintf(MEM, "%s/%s/%s %s %s %s /%s", mode, player.cname, player.Party.leader_name, player.Party.mate1.name, player.Party.mate2.name, player.Party.mate3.name, buffer);  //kk
   }
   else if (buffer[0] == '2') {
     char * whispName;
