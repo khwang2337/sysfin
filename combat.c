@@ -27,7 +27,23 @@ player.MOVE4_ID
 int endDungeon(int a){
     return !a;
 }
-void processStats(character a, char stats,int counter){
+//LOL had this in server already btw
+void convertC(character player, char *info) {
+  player.CLASS_ID = atoi(strsep(&info," "));
+  player.DUNGEON = atoi(strsep(&info," "));
+  player.HP = atoi(strsep(&info," "));
+  player.ATK = atoi(strsep(&info," "));
+  player.MATK = atoi(strsep(&info," "));
+  player.DEF = atoi(strsep(&info," "));
+  player.MDEF = atoi(strsep(&info," "));
+  player.MOVE1_ID = atoi(strsep(&info," "));
+  player.MOVE2_ID = atoi(strsep(&info," "));
+  player.MOVE3_ID = atoi(strsep(&info," "));
+  player.MOVE4_ID = atoi(strsep(&info," "));
+} //converts string to player struct
+
+/*
+void processStats(character a, char stats){
     if(counter ==1){
         a.cname = stats;
     }
@@ -55,8 +71,8 @@ void processStats(character a, char stats,int counter){
     if(counter ==9){
         a.MOVE4_ID = atoi(stats);
     }
-    
 }
+*/
 
 int isDead(character a){
     if(a.HP ==0){
@@ -69,7 +85,7 @@ int isDead(character a){
 
 
 
-void action(character player, int sd, char buffer[], int a, int b){
+void action(character player, int sd, int a, int b){
     int move;
     if (a == 1) move = player.MOVE1_ID;
     if (a == 2) move = player.MOVE2_ID;
@@ -77,17 +93,17 @@ void action(character player, int sd, char buffer[], int a, int b){
     if (a == 4) move = player.MOVE4_ID;
     int type = check(player.CLASS_ID,move);
     
-    //single + 
-    if (type == 0) {
-         
-    }
+    //single + buff 
+    if (type == 0) move(sd, player, player, a, b, 0);
+    if (type == 1) move(sd, player, player, a, b, 1);
+    if (type == 2) move(sd, player, enemy, a, b, 2);
 }
 
+//literally only sets everything up
 void startBattle(character party[],character enemy, character attacker, int move, int target){
     srand(time(NULL));
     int deathCount = 0;
     int inProgress = 1;
-        
     if (enemy.CD_NOW == 0){
         int r = rand()%5;
         determine (enemy, party, enemy, r);
@@ -110,7 +126,7 @@ void startBattle(character party[],character enemy, character attacker, int move
     }
 }
 
-void startDungeon(character party[], int dungeonDifficulty){
+void startDungeon(character player, int dungeonDifficulty){
     printf("You have entered %d\n", dungeonDifficulty);//welcome msg, subject to change
     chdir("dungeons");
     char dungeonName[];
@@ -119,12 +135,15 @@ void startDungeon(character party[], int dungeonDifficulty){
     
     if(dungeonDifficulty ==1){
         strcpy(dungeonName,"dungeon1.txt");
+        player.DUNGEON = 1;
     }
     else if(dungeonDifficulty ==2){
         strcpy(dungeonName,"dungeon2.txt");
+        player.DUNGEON = 2;
     }
     else{
         strcpy(dungeonName,"dungeon3.txt");
+        player.DUNGEON = 3;
     }
         
     FILE *fd = fopen(dungeonName, "r");
@@ -136,22 +155,17 @@ void startDungeon(character party[], int dungeonDifficulty){
         char *line;
         while(fgets(line,sizeof(line),fp)!=NULL){
             counter++;
+            if (!(counter%2) && counter > 1){
+                processStats(enemy,line);
+                printf("You have encountered %s!\n",enemy.cname);
+                numberOfFloors--;
+            }
             if(counter == 1){
                 numberofFloors = atoi(line);
             }
             if(!strcmp("Floor 1",line)){
                 printf("This is the first floor\n");
             }
-            strcpy(enemyStat,line);
-            char * token;
-            const char* str = strdup(enemy);
-            while((token = strsep(&str," "))){
-                statCounter++;
-                processStats(enemy,*token,statCounter);
-            }
-            printf("You have encountered %s!\n",enemy.cname);
-            startBattle(character party[],enemy);
-            numberOfFloors --;
             if(endDungeon(numberOfFloors)){
                 printf("You have reached the end of %s\n",dungeonName);
             }

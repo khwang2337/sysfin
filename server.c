@@ -142,19 +142,19 @@ char * convertS(character player, char buffer[]) {
 }
 //converts player struct to a string we can write into accounts
 
-void convertC(character player, char *info) {
+void convertC(character *player, char *info) {
   printf("convertC used");
-  player.CLASS_ID = atoi(strsep(&info," "));
-  player.DUNGEON = atoi(strsep(&info," "));
-  player.HP = atoi(strsep(&info," "));
-  player.ATK = atoi(strsep(&info," "));
-  player.MATK = atoi(strsep(&info," "));
-  player.DEF = atoi(strsep(&info," "));
-  player.MDEF = atoi(strsep(&info," "));
-  player.MOVE1_ID = atoi(strsep(&info," "));
-  player.MOVE2_ID = atoi(strsep(&info," "));
-  player.MOVE3_ID = atoi(strsep(&info," "));
-  player.MOVE4_ID = atoi(strsep(&info," "));
+  player->CLASS_ID = atoi(strsep(&info," "));
+  player->DUNGEON = atoi(strsep(&info," "));
+  player->HP = atoi(strsep(&info," "));
+  player->ATK = atoi(strsep(&info," "));
+  player->MATK = atoi(strsep(&info," "));
+  player->DEF = atoi(strsep(&info," "));
+  player->MDEF = atoi(strsep(&info," "));
+  player->MOVE1_ID = atoi(strsep(&info," "));
+  player->MOVE2_ID = atoi(strsep(&info," "));
+  player->MOVE3_ID = atoi(strsep(&info," "));
+  player->MOVE4_ID = atoi(strsep(&info," "));
 } //converts string to player struct
 
 void command(int sd, char buffer[], character player) {
@@ -162,6 +162,7 @@ void command(int sd, char buffer[], character player) {
   //help CLIENT
   //use _ _
   char * command;
+  char * name;
   
   strsep(&buffer, "/");
   command = strsep(&buffer, " ");
@@ -178,14 +179,14 @@ void command(int sd, char buffer[], character player) {
       int partyID = shmget(player.party_key, 228, IPC_CREAT | 0644);
       player.Party = shmat(partyID, 0, 0);
       
-      player.Party.leader_name = player.cname;
-      player.Party.size = 1;
-      player.Party.mate1.does_exist = 0;
-      player.Party.mate2.does_exist = 0;
-      player.Party.mate3.does_exist = 0;
-      strcpy(player.Party.mate1.name, "lol");
-      strcpy(player.Party.mate2.name, "lol");
-      strcpy(player.Party.mate3.name, "lol");
+      player.Party->leader_name = player.cname;
+      player.Party->size = 1;
+      player.Party->mate1.does_exist = 0;
+      player.Party->mate2.does_exist = 0;
+      player.Party->mate3.does_exist = 0;
+      strcpy(player.Party->mate1.name, "lol");
+      strcpy(player.Party->mate2.name, "lol");
+      strcpy(player.Party->mate3.name, "lol");
       
       write(sd, "3 [SERVER]: Party has been successfully created", 48);
     }
@@ -195,62 +196,97 @@ void command(int sd, char buffer[], character player) {
     if (! player.in_party) {
       player.party_key = (int) strtol(buffer, (char **)NULL, 10); //man this
       player.Party = shmat(shmget(player.party_key, 228, 0), 0, 0);
-      if (player.Party.size < 4) {
-        if (! player.Party.mate1.does_exist) {
-          strcpy(player.Party.mate1.name, player.cname);
-          player.Party.mate1.ready_status = 0;
-          player.Party.mate1.does_exist = 1;
+      if (player.Party->size < 4) {
+        if (! player.Party->mate1.does_exist) {
+          strcpy(player.Party->mate1.name, player.cname);
+          player.Party->mate1.is_ready = 0;
+          player.Party->mate1.does_exist = 1;
         }
-        else if (! player.Party.mate2.does_exist) {
-          strcpy(player.Party.mate2.name, player.cname);
-          player.Party.mate2.ready_status = 0;
-          player.Party.mate2.does_exist = 1;
+        else if (! player.Party->mate2.does_exist) {
+          strcpy(player.Party->mate2.name, player.cname);
+          player.Party->mate2.is_ready = 0;
+          player.Party->mate2.does_exist = 1;
         }
-        else if (! player.Party.mate3.does_exist) {
-          strcpy(player.Party.mate3.name, player.cname);
-          player.Party.mate2.ready_status = 0;
-          player.Party.mate2.does_exist = 1;
+        else if (! player.Party->mate3.does_exist) {
+          strcpy(player.Party->mate3.name, player.cname);
+          player.Party->mate2.is_ready = 0;
+          player.Party->mate2.does_exist = 1;
         }
-        Party.size++;
+        player.Party->size++;
         write(sd, "3 [Server]: Successfully joined party", 38);
       }
       else write(sd, "3 [Server]: Party is full :(", 29);
     }
     else write(sd, "3 [Server]: Already in a party", 31);
   }
-  else if (! strcmp(command, "leaveparty")); //if leader remove shared memory and initiate kicks, set party_key to 0
-  else if (! strcmp(command, "kick")); //checks if in party and is leader, initiate kick sequence
+  else if (! strcmp(command, "leaveparty"));//if leader remove shared memory and initiate kicks, set party_key to 0
+  else if (! strcmp(command, "kick")) { //checks if in party and is leader, initiate kick sequence
+    if (player.in_party) {
+      if (! strcmp(player.Party->leader_name, player.cname)) {
+        name = strsep(&buffer, " ");
+        if (! strcmp(name, player.Party->mate1.name));
+        else if (! strcmp(name, player.Party->mate2.name)); //initiate kick sequence
+        else if (! strcmp(name, player.Party->mate3.name)); //initiate kick sequence
+        else write(sd, "3 [Server]: Invalid player name", 32);
+      }
+      else write(sd, "3 [Server]: You must be the party leader", 41);
+    }
+    else write(sd, "3 [Server]: You must be the party leader", 41);
+  }
   else if (! strcmp(command, "ready")) { //sets ready
     if (player.in_party) {
-      if (! strcmp(player.Party.leader_name, player.cname)) write(sd, "3 [Server]: The partyleader cannot ready", 41);
+      if (! strcmp(player.Party->leader_name, player.cname)) write(sd, "3 [Server]: The partyleader cannot ready", 41);
       else {
-        if (! strcmp(player.Party.mate1.name, player.cname)) {
-          if (! player.Party.mate1.is_ready) {
-            player.Party.mate1.is_ready = 1;
+        if (! strcmp(player.Party->mate1.name, player.cname)) {
+          if (! player.Party->mate1.is_ready) {
+            player.Party->mate1.is_ready = 1;
             write(sd, "3 [Server]: You have readied", 29);
           }
           else write(sd, "3 [Server]: You are already ready", 34);
         }
-        else if (! strcmp(player.Party.mate2.name, player.cname)) {
-          if (! player.Party.mate2.is_ready) {
-            player.Party.mate2.is_ready = 1;
+        else if (! strcmp(player.Party->mate2.name, player.cname)) {
+          if (! player.Party->mate2.is_ready) {
+            player.Party->mate2.is_ready = 1;
             write(sd, "3 [Server]: You have readied", 29);
           }
           else write(sd, "3 [Server]: You are already ready", 34);
         } 
-        else if (! strcmp(player.Party.mate3.name, player.cname)) {
-          if (! player.Party.mate3.is_ready) {
-            player.Party.mate3.is_ready = 1;
+        else if (! strcmp(player.Party->mate3.name, player.cname)) {
+          if (! player.Party->mate3.is_ready) {
+            player.Party->mate3.is_ready = 1;
             write(sd, "3 [Server]: You have readied", 29);
           }
           else write(sd, "3 [Server]: You are already ready", 34);
         } 
+      }
     }
     else write(sd, "3 [Server]: You must be in a party to ready", 44);
   }
   else if (! strcmp(command, "start")) { //if leader and all ready, start
-    if (player.in_party && (! strcmp(player.Party.leader_name, player.cname) && (player.Party.mate1.does_exist && ) )
-    //existTRUE - checkREADY //existFALSE - noCheck
+    //if (player.in_party && (! strcmp(player.Party->leader_name, player.cname) && (! (player.Party->mate1.does_exist && (! player.Party->mate1.is_ready))) && (! (player.Party->mate2.does_exist && (! player.Party->mate2.is_ready))) && (! (player.Party->mate3.does_exist && (! player.Party->mate.is_ready))))
+    if (player.in_party) {
+      if (! strcmp(player.Party->leader_name, player.cname)) {
+        if ( (! (player.Party->mate1.does_exist && (! player.Party->mate1.is_ready))) && (! (player.Party->mate2.does_exist && (! player.Party->mate2.is_ready))) && (! (player.Party->mate3.does_exist && (! player.Party->mate3.is_ready))) ) {
+          printf("This is where I enter the dungeon\n"); //maybe have a location var in party?
+        }
+        else {
+          if (player.Party->mate1.does_exist && (! player.Party->mate1.is_ready)) {
+            sscanf(buffer, "3 [Server]: %s is not ready", player.Party->mate1.name);
+            write(sd, buffer, MESSAGE_BUFFER_SIZE);
+          }
+          if (player.Party->mate1.does_exist && (! player.Party->mate2.is_ready)) {
+            sscanf(buffer, "3 [Server]: %s is not ready", player.Party->mate2.name);
+            write(sd, buffer, MESSAGE_BUFFER_SIZE);
+          }
+          if (player.Party->mate1.does_exist && (! player.Party->mate3.is_ready)) {
+            sscanf(buffer, "3 [Server]: %s is not ready", player.Party->mate3.name);
+            write(sd, buffer, MESSAGE_BUFFER_SIZE);
+          }
+        }
+      }
+      else write(sd, "3 [Server]: You're not the party leader", 40);
+    }
+    else write(sd, "3 [Server]: You're not in a party", 34);
   }
 }
 
@@ -273,7 +309,7 @@ void chat(int sd, char buffer[], character player) {
     //sscanf(buffer, "%d %s", mode, temp);
     //CHECK IF PLAYER IS IN A PARTY!!!
     mode = strsep(&buffer, " ");
-    sprintf(MEM, "%s/%s/%s %s %s %s /%s", mode, player.cname, player.Party.leader_name, player.Party.mate1.name, player.Party.mate2.name, player.Party.mate3.name, buffer);  //kk
+    sprintf(MEM, "%s/%s/%s %s %s %s /%s", mode, player.cname, player.Party->leader_name, player.Party->mate1.name, player.Party->mate2.name, player.Party->mate3.name, buffer);  //kk
   }
   else if (buffer[0] == '2') {
     char * whispName;
@@ -319,21 +355,33 @@ void update(int sd, character player) {
       
       //sscanf(MEM, "%d/%s/%s/%s", mode, author, intended, message);
       mode = temp[0];
-      strsep(&temp, "/");
-      author = strsep(&temp, "/");
-      intended = strsep(&temp, "/");
-      
-      if (mode == 0) sprintf(buffer, "%d/%s: %s", mode, author, temp);
-      else if (mode == 1 && strstr(intended, name) != NULL) {
-        
-        sprintf(buffer, "%d/%s: %s", mode, author, temp);
-        
+      if (mode = '/') {
+        strsep(&temp, "/");
+        author = strsep(&temp, "/");
+        if (! strcmp(author, "kicked")) {
+          player.in_party = 0;
+          player.party_key = 0;
+          shmdt(player.Party);
+          write(sd, "3 [Server]: You have been removed from the party", 49);
+        }
       }
-      else if (mode == 2 && ( (! strcmp(intended, player.cname)) || (! strcmp(author, player.cname)) ) ) {
-        if (! strcmp(author, player.cname)) sprintf(buffer, "%d/To %s: %s", mode, intended, temp);
-        else sprintf(buffer, "%d/From %s: %s", mode, author, temp);
+      else {
+        strsep(&temp, "/");
+        author = strsep(&temp, "/");
+        intended = strsep(&temp, "/");
+        
+        if (mode == 0) sprintf(buffer, "%d/%s: %s", mode, author, temp);
+        else if (mode == 1 && strstr(intended, name) != NULL) {
+          
+          sprintf(buffer, "%d/%s: %s", mode, author, temp);
+          
+        }
+        else if (mode == 2 && ( (! strcmp(intended, player.cname)) || (! strcmp(author, player.cname)) ) ) {
+          if (! strcmp(author, player.cname)) sprintf(buffer, "%d/To %s: %s", mode, intended, temp);
+          else sprintf(buffer, "%d/From %s: %s", mode, author, temp);
+        }
+        write(sd, buffer, MESSAGE_BUFFER_SIZE);
       }
-      write(sd, buffer, MESSAGE_BUFFER_SIZE);
     }
     
     
@@ -357,9 +405,9 @@ void setup(character player, int sd) {
       read(sd, buffer, MESSAGE_BUFFER_SIZE);
       int classChoice = atoi(buffer);
       if (classChoice > 3 || classChoice <= 0 ) printf("Invalid Choice!");
-      else if (classChoice == 1) convertC(player,"1 1 500 100 100 100 100 1 1 1 1");//Warrior
-      else if (classChoice == 2) convertC(player,"2 1 500 100 100 100 100 1 1 1 1");//Mage
-      else if (classChoice == 3) convertC(player,"3 1 500 100 100 100 100 1 1 1 1");//Hunter
+      else if (classChoice == 1) convertC(&player,"1 1 500 100 100 100 100 1 1 1 1");//Warrior
+      else if (classChoice == 2) convertC(&player,"2 1 500 100 100 100 100 1 1 1 1");//Mage
+      else if (classChoice == 3) convertC(&player,"3 1 500 100 100 100 100 1 1 1 1");//Hunter
     }
     else if (player.CLASS_ID != 0) {
       write(sd, "classy", MESSAGE_BUFFER_SIZE);

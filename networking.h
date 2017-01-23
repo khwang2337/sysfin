@@ -8,7 +8,7 @@
 typedef struct partymember {
   char does_exist;
   char name[MESSAGE_BUFFER_SIZE];
-  int ready_status;
+  int is_ready;
 } partymember;
 
 typedef struct party {
@@ -43,7 +43,7 @@ typedef struct character {
   char last_message[MESSAGE_BUFFER_SIZE];
   int in_party; //may not need
   int party_key;
-  party Party;
+  party * Party;
   
   //Enemy only
   int CD;

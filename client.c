@@ -161,7 +161,7 @@ void chatSYS(int sd, int * chat_set, char * curr_whisp) {
 }
 
 void ENDCUR(int sd) { //does graphical display and ncurses 
-  char buffer[MESSAGE_BUFFER_SIZE];
+  char * buffer;
   char * lead;
   
   while (1) {
