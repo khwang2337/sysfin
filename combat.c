@@ -28,19 +28,23 @@ int endDungeon(int a){
     return !a;
 }
 //LOL had this in server already btw
-void convertC(character player, char *info) {
-  player.CLASS_ID = atoi(strsep(&info," "));
-  player.DUNGEON = atoi(strsep(&info," "));
-  player.HP = atoi(strsep(&info," "));
-  player.ATK = atoi(strsep(&info," "));
-  player.MATK = atoi(strsep(&info," "));
-  player.DEF = atoi(strsep(&info," "));
-  player.MDEF = atoi(strsep(&info," "));
-  player.MOVE1_ID = atoi(strsep(&info," "));
-  player.MOVE2_ID = atoi(strsep(&info," "));
-  player.MOVE3_ID = atoi(strsep(&info," "));
-  player.MOVE4_ID = atoi(strsep(&info," "));
+void convertC(character *player, char *info) {
+  printf("convertC used");
+  char *fixInfo = strdup(info);
+  player->CLASS_ID = atoi(strsep(&info," "));
+  player->DUNGEON = atoi(strsep(&info," "));
+  player->HP = atoi(strsep(&info," "));
+  player->ATK = atoi(strsep(&info," "));
+  player->MATK = atoi(strsep(&info," "));
+  player->DEF = atoi(strsep(&info," "));
+  player->MDEF = atoi(strsep(&info," "));
+  player->MOVE1_ID = atoi(strsep(&info," "));
+  player->MOVE2_ID = atoi(strsep(&info," "));
+  player->MOVE3_ID = atoi(strsep(&info," "));
+  player->MOVE4_ID = atoi(strsep(&info," "));
+  free(fixInfo);
 } //converts string to player struct
+
 
 /*
 void processStats(character a, char stats){
@@ -82,9 +86,39 @@ int isDead(character a){
         return 0;
     }
 }
+int formula(int atk, int atkbuff,int atkdeb,int multipler,int def,int defbuff,int defdeb){
+    return ((atk * atk * (1-atkdeb) * (1+atkbuff)*multipler)/(def * defbuff * defdeb));
+}
 
+int attack(character* player,character* target,int move){
+//	check player's class;
+//	decrease all the timers on debuff and buffs for both player and target(if a timer reaches zero, turn buff/debuff back to 0)
+//	decrease timers on stun and poison
 
-
+    int cID = player.classID;
+	if (cID == 1){
+	    check//Let's pretend 1 is "Warrior"
+		 if (move == 1){					//This would be "Swing"
+		 	if (player.MOVE1_ID == 1) {			//This would be base skill
+				target.HP_LOST += formula(player.ATK,player.ATKBUFF,player.ATKDEB,1,target.DEF,target.DEFBUFF,target.DEFDEB)
+			}
+			if (player.MOVE1_ID == 2) {			//This would be branch 1 of first upgrade. "Swing Break"
+				target.HP_LOST += ......
+				target.DEFDEB = 20;
+				target.DEFDEB_TURNS = 3;
+			}
+			if player.MOVE1_ID == 3) {			//This would be branch 2 of first upgrade. "Heavy Swing"
+				target.HP_LOST += ......
+				//More damage or something
+			}
+			//ETC.
+	}
+	if (cID == 2){
+		.....
+	}
+	if(player->ATKBUFF_TURNS > 0) (player->ATKBUFF_TURNS)--;
+	if(player->)
+}
 void action(character player, int sd, int a, int b){
     int move;
     if (a == 1) move = player.MOVE1_ID;
@@ -156,7 +190,7 @@ void startDungeon(character player, int dungeonDifficulty){
         while(fgets(line,sizeof(line),fp)!=NULL){
             counter++;
             if (!(counter%2) && counter > 1){
-                processStats(enemy,line);
+                processStats(*enemy,line);
                 printf("You have encountered %s!\n",enemy.cname);
                 numberOfFloors--;
             }
@@ -172,14 +206,6 @@ void startDungeon(character player, int dungeonDifficulty){
             if(!strcmp("Floor 2",line)){
                 printf("This is the second floor\n");
             }
-            strcpy(enemyStat,line);
-            char * token;
-            const char* str = strdup(enemy);
-            while((token = strsep(&str," "))){
-                statCounter++;
-                processStats(enemy,*token,statCounter);
-            }
-            printf("You have encountered %s!\n",enemy.cname);
             startBattle(character party[],enemy);
             numberOfFloors --;
             if(endDungeon(numberOfFloors)){
@@ -203,6 +229,8 @@ void startDungeon(character player, int dungeonDifficulty){
             }
             
         }
+        printf("You have conquered the dungeon!\n Returning to lobby");
+        
     }
     
     char buffer[MESSAGE_BUFFER_SIZE];

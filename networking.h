@@ -35,7 +35,6 @@ typedef struct character {
   int MOVE2_ID;
   int MOVE3_ID;
   int MOVE4_ID;
-  
   //Player only
   int DC;
   //int current_chat;

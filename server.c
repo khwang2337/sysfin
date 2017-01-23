@@ -142,7 +142,8 @@ char * convertS(character player, char buffer[]) {
 }
 //converts player struct to a string we can write into accounts
 
-void convertC(character *player, char *info) {
+void convertC(character *player, char *a) {
+  char * info = strdup(a);
   printf("convertC used");
   player->CLASS_ID = atoi(strsep(&info," "));
   player->DUNGEON = atoi(strsep(&info," "));
@@ -155,23 +156,24 @@ void convertC(character *player, char *info) {
   player->MOVE2_ID = atoi(strsep(&info," "));
   player->MOVE3_ID = atoi(strsep(&info," "));
   player->MOVE4_ID = atoi(strsep(&info," "));
+  free(info);
 } //converts string to player struct
 
 void command(int sd, char buffer[], character player) {
   //whisper ___ //party //lobby CLIENT
   //help CLIENT
   //use _ _
-  char * command;
+  char * commandS;
   char * name;
   
   strsep(&buffer, "/");
-  command = strsep(&buffer, " ");
-  if (! strcmp(command,"use")) {
+  commandS = strsep(&buffer, " ");
+  if (! strcmp(commandS,"use")) {
     char * a = strsep(&buffer," ");
     char * b = strsep(&buffer," ");
     //action(player, sd, a, b); //commented to try compiling
   }
-  else if (! strcmp(command, "createparty")) { //check in_party(or see if party_key) is 0, ftok create shared memory, set party_key
+  else if (! strcmp(commandS, "createparty")) { //check in_party(or see if party_key) is 0, ftok create shared memory, set party_key
     //nt shmd = shmget(420, 1024, IPC_CREAT | 0664);
     //size of party 228 bytes
     if (! player.in_party) {
@@ -192,7 +194,7 @@ void command(int sd, char buffer[], character player) {
     }
     else write(sd, "3 [SERVER]: You are already in a party", 39);
   }
-  else if (! strcmp(command, "joinparty")) { //join party, check party_key
+  else if (! strcmp(commandS, "joinparty")) { //join party, check party_key
     if (! player.in_party) {
       player.party_key = (int) strtol(buffer, (char **)NULL, 10); //man this
       player.Party = shmat(shmget(player.party_key, 228, 0), 0, 0);
@@ -219,21 +221,68 @@ void command(int sd, char buffer[], character player) {
     }
     else write(sd, "3 [Server]: Already in a party", 31);
   }
-  else if (! strcmp(command, "leaveparty"));//if leader remove shared memory and initiate kicks, set party_key to 0
-  else if (! strcmp(command, "kick")) { //checks if in party and is leader, initiate kick sequence
+  else if (! strcmp(commandS, "leaveparty")) {//if leader remove shared memory and initiate kicks, set party_key to 0
+    if (player.in_party) {
+      if (! strcmp(player.Party->leader_name, player.cname)) {
+        //kick members
+        if (player.Party->mate1.does_exist) {
+          sprintf(name, "/kick %s", player.Party->mate1.name);
+          command(sd, name, player);
+        }
+        if (player.Party->mate2.does_exist) {
+          sprintf(name, "/kick %s", player.Party->mate2.name);
+          command(sd, name, player);
+        }
+        if (player.Party->mate3.does_exist) {
+          sprintf(name, "/kick %s", player.Party->mate3.name);
+          command(sd, name, player);
+        }
+        //remove shared memory
+        struct shmid_ds d;
+        shmdt(player.Party);
+        shmctl(player.party_key, IPC_RMID, &d); //look into this
+        player.in_party = 0;
+      }
+      else {
+        if (! strcmp(player.Party->mate1.name, player.cname)) {
+          player.in_party = 0;
+          player.Party->mate1.does_exist = 0;
+          strcpy(player.Party->mate1.name, "lol");
+          shmdt(player.Party);
+        }
+        else if (! strcmp(player.Party->mate2.name, player.cname)) {
+          player.in_party = 0;
+          player.Party->mate2.does_exist = 0;
+          strcpy(player.Party->mate2.name, "lol");
+          shmdt(player.Party);
+        }
+        else if (! strcmp(player.Party->mate3.name, player.cname)) {
+          player.in_party = 0;
+          player.Party->mate3.does_exist = 0;
+          strcpy(player.Party->mate3.name, "lol");
+          shmdt(player.Party);
+        }
+      }
+    }
+    else write(sd, "3 [Server]: You are not in a party", 35);
+  }
+  else if (! strcmp(commandS, "kick")) { //checks if in party and is leader, initiate kick sequence
     if (player.in_party) {
       if (! strcmp(player.Party->leader_name, player.cname)) {
         name = strsep(&buffer, " ");
-        if (! strcmp(name, player.Party->mate1.name));
-        else if (! strcmp(name, player.Party->mate2.name)); //initiate kick sequence
-        else if (! strcmp(name, player.Party->mate3.name)); //initiate kick sequence
+        int shmd = shmget(420, 1024, 0);
+        char * MEM = shmat(shmd, 0, 0);
+        if ( (! strcmp(name, player.Party->mate1.name)) || (! strcmp(name, player.Party->mate2.name)) || (! strcmp(name, player.Party->mate3.name))) {
+          sprintf(buffer, "/kicked %s ", name);
+          strcpy(MEM, buffer);
+        }
         else write(sd, "3 [Server]: Invalid player name", 32);
       }
       else write(sd, "3 [Server]: You must be the party leader", 41);
     }
     else write(sd, "3 [Server]: You must be the party leader", 41);
   }
-  else if (! strcmp(command, "ready")) { //sets ready
+  else if (! strcmp(commandS, "ready")) { //sets ready
     if (player.in_party) {
       if (! strcmp(player.Party->leader_name, player.cname)) write(sd, "3 [Server]: The partyleader cannot ready", 41);
       else {
@@ -262,7 +311,7 @@ void command(int sd, char buffer[], character player) {
     }
     else write(sd, "3 [Server]: You must be in a party to ready", 44);
   }
-  else if (! strcmp(command, "start")) { //if leader and all ready, start
+  else if (! strcmp(commandS, "start")) { //if leader and all ready, start
     //if (player.in_party && (! strcmp(player.Party->leader_name, player.cname) && (! (player.Party->mate1.does_exist && (! player.Party->mate1.is_ready))) && (! (player.Party->mate2.does_exist && (! player.Party->mate2.is_ready))) && (! (player.Party->mate3.does_exist && (! player.Party->mate.is_ready))))
     if (player.in_party) {
       if (! strcmp(player.Party->leader_name, player.cname)) {
