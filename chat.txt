@@ -1,5 +1,7 @@
 MAKE NOTE:
     make last_message NOT NULL
+    
+same buffer???
 
 
 Chat

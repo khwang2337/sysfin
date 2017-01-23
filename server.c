@@ -142,7 +142,6 @@ char * convertS(character player, char buffer[]) {
 }
 //converts player struct to a string we can write into accounts
 
-
 void convertC(character player, char *info) {
   printf("convertC used");
   player.CLASS_ID = atoi(strsep(&info," "));
@@ -158,50 +157,127 @@ void convertC(character player, char *info) {
   player.MOVE4_ID = atoi(strsep(&info," "));
 } //converts string to player struct
 
-void command(int sd, char buffer[], character * player) {
-  //save
-  //whisper /w chat setting, last whispered
-  //party /p
-  //lobby /a
-  //
-}
-void request(int sd, char buffer[]) {
-/*void chat(int sd, char buffer[]) {
-  if (current_chat == 0) {
-     
+void command(int sd, char buffer[], character player) {
+  //whisper ___ //party //lobby CLIENT
+  //help CLIENT
+  //use _ _
+  char * command;
+  
+  strsep(&buffer, "/");
+  command = strsep(&buffer, " ");
+  if (! strcmp(command,"use")) {
+    char * a = strsep(&buffer," ");
+    char * b = strsep(&buffer," ");
+    //action(player, sd, buffer, a, b); //commented to try compiling
   }
-  else if (current_chat == 1) {
-    
+  else if (! strcmp(command, "createparty")) { //check in_party(or see if party_key) is 0, ftok create shared memory, set party_key
+    //nt shmd = shmget(420, 1024, IPC_CREAT | 0664);
+    //size of party 228 bytes
+    if (! player.in_party) {
+      player.party_key = ftok(player.cname, getpid());
+      int partyID = shmget(player.party_key, 228, IPC_CREAT | 0644);
+      player.Party = shmat(partyID, 0, 0);
+      
+      player.Party.leader_name = player.cname;
+      player.Party.size = 1;
+      player.Party.mate1.does_exist = 0;
+      player.Party.mate2.does_exist = 0;
+      player.Party.mate3.does_exist = 0;
+      write(sd, "3 [SERVER]: Party has been successfully created", 48);
+    }
+    else write(sd, "3 [SERVER]: You are already in a party", 39);
   }
-  else {
-    
+  else if (! strcmp(command, "joinparty")) { //join party, check party_key
+    if (! player.in_party) {
+      player.party_key = (int) strtol(buffer, (char **)NULL, 10); //man this
+      player.Party = shmat(shmget(player.party_key, 228, 0), 0, 0);
+      if (player.Party.size < 4) {
+        if (! player.Party.mate1.does_exist) {
+          strcpy(player.Party.mate1.name, player.cname);
+          player.Party.mate1.ready_status = 0;
+          player.Party.mate1.does_exist = 1;
+        }
+        else if (! player.Party.mate2.does_exist) {
+          strcpy(player.Party.mate2.name, player.cname);
+          player.Party.mate2.ready_status = 0;
+          player.Party.mate2.does_exist = 1;
+        }
+        else if (! player.Party.mate3.does_exist) {
+          strcpy(player.Party.mate3.name, player.cname);
+          player.Party.mate2.ready_status = 0;
+          player.Party.mate2.does_exist = 1;
+        }
+        Party.size++;
+        write(sd, "3 [Server]: Successfully joined party", 38);
+      }
+      else write(sd, "3 [Server]: Party is full :(", 29);
+    }
+    else write(sd, "3 [Server]: Already in a party", 31);
   }
-*/
+  else if (! strcmp(command, "leaveparty")); //if leader remove shared memory and initiate kicks, set party_key to 0
+  else if (! strcmp(command, "kick")); //checks if in party and is leader, initiate kick sequence
+  else if (! strcmp(command, "ready")) { //sets ready
+    if (player.in_party) {
+      if (! strcmp(player.Party.leader_name, player.cname)) write(sd, "3 [Server]: The partyleader cannot ready", 41);
+      else {
+        if (! strcmp(player.Party.mate1.name, player.cname)) {
+          if (! player.Party.mate1.is_ready) {
+            player.Party.mate1.is_ready = 1;
+            write(sd, "3 [Server]: You have readied", 29);
+          }
+          else write(sd, "3 [Server]: You are already ready", 34);
+        }
+        else if (! strcmp(player.Party.mate2.name, player.cname)) {
+          if (! player.Party.mate2.is_ready) {
+            player.Party.mate2.is_ready = 1;
+            write(sd, "3 [Server]: You have readied", 29);
+          }
+          else write(sd, "3 [Server]: You are already ready", 34);
+        } 
+        else if (! strcmp(player.Party.mate3.name, player.cname)) {
+          if (! player.Party.mate3.is_ready) {
+            player.Party.mate3.is_ready = 1;
+            write(sd, "3 [Server]: You have readied", 29);
+          }
+          else write(sd, "3 [Server]: You are already ready", 34);
+        } 
+    }
+    else write(sd, "3 [Server]: You must be in a party to ready", 44);
+  }
+  else if (! strcmp(command, "start")) { //if leader and all ready, start
+    if (player.in_party && (! strcmp(player.Party.leader_name, player.cname) && player.Party.mate1.does_exist)
+  }
 }
 
-int getsPID(char * name) {
-  
-}
+//void request(int sd, char buffer[]) 
 
 void chat(int sd, char buffer[], character player) {
+  //"char *strsep(char **stringp, const char *delim);"
   int shmd = shmget(420, 1024, 0);
-  char MEM[1024] = shmat(shmd, 0, 0);
-  char temp[MESSAGE_BUFFER_SIZE];
-  int mode;
+  char * MEM = shmat(shmd, 0, 0);
+  //char mode[MESSAGE_BUFFER_SIZE];
+  char * mode;
+  
   if (buffer[0] == '0') {
     //sscanf(buffer, "%d %s", mode, temp);
-    //sprintf(MEM, "%d/%s/all/%s", mode, player.cname, temp);
+    mode = strsep(&buffer, " ");
+    sprintf(MEM, "%s/%s/all/%s", mode, player.cname, buffer);  
   }
   else if (buffer[0] == '1') {
+    //if (! player.in_party) write(sd, ) //DO IN CLIENT
     //sscanf(buffer, "%d %s", mode, temp);
-    //sprintf(MEM, "%d/%s/%s %s %s %s /%s", mode, player.cname, party[0], party[1], party[2], party[3], temp);
+    mode = strsep(&buffer, " ");
+    sprintf(MEM, "%s/%s/%s %s %s %s /%s", mode, player.cname, player.Party.leader.name, player.Party.mate1.name, player.Party.mate2.name, player.Party.mate3.name, buffer);  //kk
   }
   else if (buffer[0] == '2') {
-    char whispName[MESSAGE_BUFFER_SIZE];
+    char * whispName;
     //sscanf(buffer, "%d %s %s", mode, whispName, temp);
-    //sprintf(MEM, "%d/%s/%s/%s", mode, player.cname, player.cname, whispName, temp);
+    //set latest_whisp name!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    mode = strsep(&buffer, " ");
+    whispName = strsep(&buffer, " ");
+    sprintf(MEM, "%s/%s/%s/%s", mode, player.cname, whispName, buffer);
   }
-  shmdt(m);
+  shmdt(MEM);
 }
 
 
@@ -218,12 +294,12 @@ void interpret(int sd, character player) {
 
 void update(int sd, character player) {
   int shmd = shmget(420, 1024, 0);
-  char MEM[1024] = shmat(shmd, 0, 0); //struct message * m, address is just message m <-- pointer
+  char * MEM = shmat(shmd, 0, 0); //struct message * m, address is just message m <-- pointer
   char name[MESSAGE_BUFFER_SIZE] = {0};
   char buffer[MESSAGE_BUFFER_SIZE];
-  char message[MESSAGE_BUFFER_SIZE];
-  char intended[MESSAGE_BUFFER_SIZE];
-  char author[MESSAGE_BUFFER_SIZE];
+  char * temp;
+  char * intended;
+  char *author;
   int mode;
   
   strcpy(name, player.cname);
@@ -231,17 +307,27 @@ void update(int sd, character player) {
   
   while (1) {
     //check shared memory
-    if (strstr(MEM, name) != NULL && strcmp(player.last_message, MEM)) {
+    if (strcmp(player.last_message, MEM) && strstr(MEM, name) != NULL) {
       strcpy(player.last_message, MEM);
-      sscanf(MEM, "%d/%s/%s/%s", mode, author, intended, message);
+      strcpy(temp, MEM);
       
-      if (mode == 0) sprintf(buffer, "%d/%s: %s", mode, author, message);
-      else if (mode == 1 && strstr(intended, name) != NULL) sprintf(buffer, "%d/%s: %s", mode, author, message);
+      //sscanf(MEM, "%d/%s/%s/%s", mode, author, intended, message);
+      mode = temp[0];
+      strsep(&temp, "/");
+      author = strsep(&temp, "/");
+      intended = strsep(&temp, "/");
+      
+      if (mode == 0) sprintf(buffer, "%d/%s: %s", mode, author, temp);
+      else if (mode == 1 && strstr(intended, name) != NULL) {
+        
+        sprintf(buffer, "%d/%s: %s", mode, author, temp);
+        
+      }
       else if (mode == 2 && ( (! strcmp(intended, player.cname)) || (! strcmp(author, player.cname)) ) ) {
-        if (! strcmp(author, player.cname) sprintf(buffer, "%d/To %s: %s", mode, intended, temp);
+        if (! strcmp(author, player.cname)) sprintf(buffer, "%d/To %s: %s", mode, intended, temp);
         else sprintf(buffer, "%d/From %s: %s", mode, author, temp);
       }
-      
+      write(sd, buffer, MESSAGE_BUFFER_SIZE);
     }
     
     
@@ -260,7 +346,7 @@ void setup(character player, int sd) {
   int check = 1;
   
   while (check > 0){
-    if (player.CLASS_ID a == 0){
+    if (player.CLASS_ID == 0){
       write(sd, "no class", MESSAGE_BUFFER_SIZE);
       read(sd, buffer, MESSAGE_BUFFER_SIZE);
       int classChoice = atoi(buffer);
@@ -287,7 +373,7 @@ void sub_server( int sd ) {
   character player = {0};
   strcpy(player.cname, "");
   strcpy(player.latest_cname, "");
-  strcpy(player.latest_message, "");
+  strcpy(player.last_message, "");
 
   char buffer[MESSAGE_BUFFER_SIZE];
   

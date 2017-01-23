@@ -67,6 +67,22 @@ int isDead(character a){
     }
 }
 
+
+
+void action(character player, int sd, char buffer[], int a, int b){
+    int move;
+    if (a == 1) move = player.MOVE1_ID;
+    if (a == 2) move = player.MOVE2_ID;
+    if (a == 3) move = player.MOVE3_ID;
+    if (a == 4) move = player.MOVE4_ID;
+    int type = check(player.CLASS_ID,move);
+    
+    //single + 
+    if (type == 0) {
+         
+    }
+}
+
 void startBattle(character party[],character enemy, character attacker, int move, int target){
     srand(time(NULL));
     int deathCount = 0;

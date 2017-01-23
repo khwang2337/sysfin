@@ -118,31 +118,63 @@ void class_select(int sd, char buffer[]){
 
 void chatSYS(int sd, int * chat_set, char * curr_whisp) {
   char buffer[MESSAGE_BUFFER_SIZE];
+  char * temp;
+  char * command;
+  //char * check;
   
   while (1) {
-    //print message and gets message
     if ( (*chat_set) == 0) printf("Lobby: ");
     else if ( (*chat_set) == 1) printf("Party: ");
     else if ( (*chat_set) == 2) printf("Whisper %s: ", curr_whisp);
     fgets(buffer, MESSAGE_BUFFER_SIZE, stdin);
-    //gets rid of newline
     buffer[strlen(buffer) - 1] = 0;
-    //if it's not a command, append a number at the end
+    
     if (buffer[0] != '/') {
-      char temp[MESSAGE_BUFFER_SIZE];
-      sprintf(temp, "%d %s", *chat_set, buffer);
+      if (*chat_set == 2) sprintf(temp, "%d %s %s", *chat_set, curr_whisp, buffer);
+      else sprintf(temp, "%d %s", *chat_set, buffer);
+      
       strcpy(buffer, temp);
     }
-    write(sd, buffer, MESSAGE_BUFFER_SIZE); //server should write back to print "not a command" if it aint a command
+    else {
+      //IS A COMMAND CHECK FOR CERTAIN COMMANDS
+      strcpy(temp, buffer);
+      strsep(&temp, "/");
+      command = strsep(&temp, " ");
+      
+      if ( (! strcmp(command, "lobby")) || (! strcmp(command, "l")) ) {
+        *chat_set = 0;
+        break;
+      }
+      else if ( (! strcmp(command, "party")) || (! strcmp(command, "p")) ) {
+        *chat_set = 1;
+        break;
+      }
+      else if ( (! strcmp(command, "whisper")) || (! strcmp(command, "w")) ) {
+        *chat_set = 2;
+        strcpy(curr_whisp, temp); 
+        break;
+      }
+      else if (! strcmp(command, "help")) printf("%s\n", HELP);
+    }
+    write(sd, buffer, MESSAGE_BUFFER_SIZE); 
   }
 }
 
 void ENDCUR(int sd) { //does graphical display and ncurses 
   char buffer[MESSAGE_BUFFER_SIZE];
+  char * lead;
+  
   while (1) {
     read(sd, buffer, MESSAGE_BUFFER_SIZE);
-    if (buffer[0] == '/') printf("%s\n", buffer);
+    lead = strsep(&buffer, " ");
+    if (! strcmp(lead, "/")) { //DO COLORS
+      if (strcmp(lead, "0")) printf("Lobby");
+      else if (strcmp(lead, "1")) printf("Party");
+      else if (strcmp(lead, "2")) printf("Whisper");
+      else if (strcmp(lead, "3")) printf("Server");
+    }
   }
+  //else server command
 }
 
 int main( int argc, char *argv[] ) {
@@ -163,6 +195,7 @@ int main( int argc, char *argv[] ) {
   
   int chat_set = 0; //chat_setting for players
   char * curr_whisp = (char *)malloc(MESSAGE_BUFFER_SIZE);
+  
   
   int check = opening(sd, buffer); //asks whether they have an account
   if (check > 0) registerC(sd, buffer); //registers them
