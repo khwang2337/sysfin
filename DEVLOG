@@ -1,0 +1,39 @@
+=============================DEVLOG=============================
+Note: Lahsel is all of us. We found it eaiser to work together on c9, especially
+      when we worked in groups of two. Also discord. Ayyy.
+
+Dec 22. 2016
+    Brainstorming
+        All Kevin
+    
+Jan 4, 2017 - Jan 6, 2017
+    Proposal 
+        Kevin & Ricky - Argued about battle mechanics, chat system, graphical utility; came up with early designs (double terminals, etc.)
+        Ruochong - Looked at text based rpg examples such as Zork. 
+        Matthew - compiled a list of data structures and what topics we learned in class to be implemented in the project.
+    
+Jan 10, 2017 - Jan 12, 2017
+    Skeletal Frame
+        Kevin - Planned function frames for chat-system and helped with structs
+        Ricky - Wrote up a giant combat.txt file that outlines the combat
+        Ruochong - Planned networking skeleton
+        Ricky+Matthew - Talked about combat->stats with skill trees and struct of character with stats.
+    
+Jan 14, 2017 - Jan 18, 2017
+    Login/Register System
+        Kevin - Built off skeletal frame, Files save information, Check-while loops
+        Ricky - checking system that checks for exceptions in login system
+        Ruochong - Further developed network infrastructure. Worked with Kevin to solve the problem of reading/writing at the same time in a single process
+        Matthew - planned an early design for account creation/verification + storage.
+    
+Jan 19, 2017 - Jan 20, 2017
+    Chat System
+        Kevin & Ricky- Finalized Login-Register system, established more backbone, Little bug fixes
+      
+Jan 23, 2017 - Jan 24, 2017
+    Verified functionality of chat system - Current working version
+    Final combat code written.
+    !!! Game breaking bug found, breaking connection between server and combat. Additional investigation required. !!!
+    Finished the combat system with various skills and skill trees. Battle mechanics are fixed.
+
+We will try our best to fix the bug and complete the project.
