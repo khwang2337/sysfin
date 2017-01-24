@@ -15,6 +15,35 @@ void sub_server( int sd );
 
 
 
+
+int main() {
+
+  int sd, connection;
+  int count = 0;
+
+  sd = server_setup();
+  
+  int shmd = shmget(420, 1024, IPC_CREAT | 0664);
+  
+  while (1) {
+
+    connection = server_connect( sd );
+
+    int f = fork();
+    if ( f == 0 ) {
+
+      close(sd);
+      sub_server( connection );
+      count +=1;
+      exit(0);
+    }
+    else {
+      close( connection );
+    }
+  }
+  return 0;
+}
+
 int checkUSER(char * name, int num) { 
   chdir("accounts/");
   int fd;
@@ -81,14 +110,13 @@ void login(int sd, character * player) {
     }
   }
   strcpy(player->cname, name); //sets playername
-  player->in_party = 0;
   
   check = 1;
   while (check) {
     write(sd, "password", 9);
     read(sd, buffer, MESSAGE_BUFFER_SIZE);
     if ( checkPASS(name, buffer) ) {
-      printf("password accepted\n");
+      printf("password accepted");
       check = 0;
     }
   }
@@ -121,50 +149,20 @@ char * convertS(character * player, char buffer[]) {
 
 void convertC(character *player, char *a) {
   char * info = strdup(a);
-  //char * info;
-  //strcpy(info, a);
-  printf("convertC used\n");
-  strsep(&info,"\n");
-  if ( player->CLASS_ID = atoi(strsep(&info," "))) {
-    printf("WE'RE INSIDE\n");
-    player->DUNGEON = atoi(strsep(&info," "));
-    printf("THIS ONE???\n");
-    player->HP = atof(strsep(&info," "));
-    printf("THIS ONE???\n");
-    player->ATK = atof(strsep(&info," "));
-    printf("THIS ONE???\n");
-    player->MATK = atof(strsep(&info," "));
-    printf("THIS ONE???\n");
-    player->DEF = atof(strsep(&info," "));
-    printf("THIS ONE???\n");
-    player->MDEF = atof(strsep(&info," "));
-    printf("THIS ONE???\n");
-    player->MOVE1_ID = atoi(strsep(&info," "));
-    printf("THIS ONE???\n");
-    player->MOVE2_ID = atoi(strsep(&info," "));
-    printf("THIS ONE???\n");
-    player->MOVE3_ID = atoi(strsep(&info," "));
-    printf("THIS ONE???\n");
-    player->MOVE4_ID = atoi(strsep(&info," "));
-    printf("THIS ONE???\n");
-  }
-  printf("WE'RE OUT!\n");
+  printf("convertC used");
+  player->CLASS_ID = atoi(strsep(&info," "));
+  player->DUNGEON = atoi(strsep(&info," "));
+  player->HP = atof(strsep(&info," "));
+  player->ATK = atof(strsep(&info," "));
+  player->MATK = atof(strsep(&info," "));
+  player->DEF = atof(strsep(&info," "));
+  player->MDEF = atof(strsep(&info," "));
+  player->MOVE1_ID = atoi(strsep(&info," "));
+  player->MOVE2_ID = atoi(strsep(&info," "));
+  player->MOVE3_ID = atoi(strsep(&info," "));
+  player->MOVE4_ID = atoi(strsep(&info," "));
   free(info);
 } //converts string to player struct
-
-void convertF(character * player) {
-  printf("convertf start\n");
-  int fd = open(player->cname, O_RDONLY);
-  //printf("don't fuck me\n");
-  char * a;
-  //printf("don't fuck me\n");
-  read(fd, a, MESSAGE_BUFFER_SIZE);
-  //printf("don't fuck me\n");
-  convertC(player, a);
-  //printf("don't fuck me\n");
-  printf("Player ClassID: %d\n", player->CLASS_ID);
-  printf("COnvertF done\n");
-}
 
 void command(int sd, char buffer[], character * player) {
   //whisper ___ //party //lobby CLIENT
@@ -172,7 +170,6 @@ void command(int sd, char buffer[], character * player) {
   //use _ _
   char * commandS;
   char * name;
-  printf("I actually got to command!!\n");
   
   strsep(&buffer, "/");
   commandS = strsep(&buffer, " ");
@@ -181,14 +178,14 @@ void command(int sd, char buffer[], character * player) {
     char * b = strsep(&buffer," ");
     //attack(player, sd, a, b); //commented to try compiling
   }
-  //else if ( (! strcmp(commandS, "reply")) || (! strcmp(commandS, "r"))) {
-  //  if (strcmp(player->last_whisp, "")) {//exists
-  //    sprintf(buffer, "/whisper %s", player->last_whisp);
-//      write(sd, buffer, MESSAGE_BUFFER_SIZE);
-//    }
-  //  else write(sd, "3 [Server]: No one to reply to", 31);
-  //} 
-  if (! strcmp(commandS, "getkey")) {
+  else if ( (! strcmp(commandS, "reply")) || (! strcmp(commandS, "r"))) {
+    if (strcmp(player->last_whisp, "")) {//exists
+      sprintf(buffer, "/whisper %s", player->last_whisp);
+      write(sd, buffer, MESSAGE_BUFFER_SIZE);
+    }
+    else write(sd, "3 [Server]: No one to reply to", 31);
+  } 
+  else if (! strcmp(commandS, "getkey")) {
     if (player->in_party) {
       char buffer2[MESSAGE_BUFFER_SIZE];
       printf("checking party\n");
@@ -221,9 +218,7 @@ void command(int sd, char buffer[], character * player) {
     else write(sd, "3 [SERVER]: You are already in a party", 39);
   }
   else if (! strcmp(commandS, "joinparty")) { //join party, check party_key
-  printf("I found joinparty!!\n");
     if (! player->in_party) {
-      printf("I am not in a party!");
       player->party_key = (int) strtol(buffer, (char **)NULL, 10); //man this
       if ( (player->Party = shmat(shmget(player->party_key, 228, 0), 0, 0) ) != (void*) -1) { //error check //check this MAN
         if (player->Party->size < 4) {
@@ -371,7 +366,6 @@ void command(int sd, char buffer[], character * player) {
     }
     else write(sd, "3 [Server]: You're not in a party", 34);
   }
-  else write(sd, "3 [Server]: Invalid Command", 29);
 }
 
 //void request(int sd, char buffer[]) 
@@ -384,32 +378,31 @@ void chat(int sd, char buffer[], character * player) {
   //char mode[MESSAGE_BUFFER_SIZE];
   char * mode;
   printf("received message: %s\n", buffer);
-  //if (buffer[0] == '0') {
-  printf("LOBBY CHAT!\n");
+  if (buffer[0] == '0') {
+    printf("LOBBY CHAT!\n");
     //sscanf(buffer, "%d %s", mode, temp);
-  strsep(&buffer, " ");
-    //sprintf(MEM, "%s/%s/all/%s", mode, player->cname, buffer);  
-  printf("I used sprintf to write to MEM!\n");
-  sprintf(MEM, "0/%s/all/%s", player->cname, buffer);
-  
-  //else if (buffer[0] == '1') {
-    //printf("PARTYCHAT!!!\n");
+    mode = strsep(&buffer, " ");
+    sprintf(MEM, "%s/%s/all/%s", mode, player->cname, buffer);  
+    printf("I used sprintf to write to MEM!\n");
+  }
+  else if (buffer[0] == '1') {
+    printf("PARTYCHAT!!!\n");
     //if (! player->in_party) write(sd, ) //DO IN CLIENT
     //sscanf(buffer, "%d %s", mode, temp);
     //CHECK IF PLAYER IS IN A PARTY!!!
-    //mode = strsep(&buffer, " ");
-    //printf("I'm here!!\n");
-    //if (player->in_party) sprintf(MEM, "%s/%s/%s %s %s %s /%s", mode, player->cname, player->Party->leader.name, player->Party->mate1.name, player->Party->mate2.name, player->Party->mate3.name, buffer);  //kk
-    //else write(sd, "3 [Server]: You are not in a party", 35);
-  //}
-  //else if (buffer[0] == '2') {
-   // char * whispName;
+    mode = strsep(&buffer, " ");
+    printf("I'm here!!\n");
+    if (player->in_party) sprintf(MEM, "%s/%s/%s %s %s %s /%s", mode, player->cname, player->Party->leader.name, player->Party->mate1.name, player->Party->mate2.name, player->Party->mate3.name, buffer);  //kk
+    else write(sd, "3 [Server]: You are not in a party", 35);
+  }
+  else if (buffer[0] == '2') {
+    char * whispName;
     //sscanf(buffer, "%d %s %s", mode, whispName, temp);
     //set latest_whisp name!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   // mode = strsep(&buffer, " ");
-   // whispName = strsep(&buffer, " ");
-   // sprintf(MEM, "%s/%s/%s/%s", mode, player->cname, whispName, buffer);
-  //}
+    mode = strsep(&buffer, " ");
+    whispName = strsep(&buffer, " ");
+    sprintf(MEM, "%s/%s/%s/%s", mode, player->cname, whispName, buffer);
+  }
   printf("I'm past the checks!\n");
   shmdt(MEM);
 }
@@ -481,26 +474,26 @@ void update(int sd, character * player) {
         printf("intended: %s\n", intended);
         printf("temp: %s\n", temp);
         
-        sprintf(buffer, "0 %s: %s", author, temp);
-        //else if (mode == 49 && strstr(intended, name) != NULL) {
-        //  
-        //  sprintf(buffer, "%c/%s: %s", mode, author, temp);
-        //  
-        //}
-        //else if (mode == 50 && ( (! strcmp(intended, player->cname)) || (! strcmp(author, player->cname)) ) ) {  //set last whispered
-        //  if (! strcmp(author, player->cname)) sprintf(buffer, "%c To %s: %s", mode, intended, temp);
-        //  else {
-        //    sprintf(buffer, "%c From %s: %s", mode, author, temp);
-        //    strcpy(player->last_whisp, author);
-        //  }
-        //}
+        if (mode == 48) sprintf(buffer, "%c %s: %s", mode, author, temp);
+        else if (mode == 49 && strstr(intended, name) != NULL) {
+          
+          sprintf(buffer, "%c/%s: %s", mode, author, temp);
+          
+        }
+        else if (mode == 50 && ( (! strcmp(intended, player->cname)) || (! strcmp(author, player->cname)) ) ) {  //set last whispered
+          if (! strcmp(author, player->cname)) sprintf(buffer, "%c To %s: %s", mode, intended, temp);
+          else {
+            sprintf(buffer, "%c From %s: %s", mode, author, temp);
+            strcpy(player->last_whisp, author);
+          }
+        }
         printf("message to write: %s\n", buffer);
         write(sd, buffer, MESSAGE_BUFFER_SIZE);
       }
     }
     
     
-    //updateprintf("THIS ONE???\n");
+    //update
     
   }
 }
@@ -509,85 +502,36 @@ void save(character * player) {
   
 }
 
-void setup(int sd, character * player) {
-  char buffer [MESSAGE_BUFFER_SIZE];
-  //char * buffer = (char *)malloc(MESSAGE_BUFFER_SIZE);
-  printf("1\n");
-  convertF(player);
-  printf("2\n");
-  if (! player->CLASS_ID) {
-    write(sd, "makeclass", 10);
-    printf("3\n");
-    read(sd, buffer, MESSAGE_BUFFER_SIZE);
-    printf("4\n");
-    if (! strcmp(buffer, "1")) convertC(player,"0\n1 1 500 100 100 100 100 1 1 1 1");
-    else if (! strcmp(buffer, "2")) convertC(player,"0\n2 1 500 100 100 100 100 1 1 1 1");
-    else if (! strcmp(buffer, "3")) convertC(player,"0\n3 1 500 100 100 100 100 1 1 1 1");
-    printf("5\n");
-    umask(0000);
-    printf("6\n");
-    int fd = open(player->cname,O_APPEND|O_WRONLY);
-    printf("7\n");
-    char * a = convertS(player,buffer);
-    printf("8\n");
-    char buffer[MESSAGE_BUFFER_SIZE];
-    printf("9\n");
-    strcpy(buffer,a);
-    printf("10\n");
-    write(fd, buffer ,MESSAGE_BUFFER_SIZE);
-    printf("11\n");
-    close(fd);
-    printf("12\n");
-  }
-  else write(sd, "proceed", 8);
-  printf("Server made it past setup.\n");
-  //free(buffer);
-}
-
-
 //THIS SHIT DONT WORK :D PLEASE HELP ME :-:
-/*
 void setup(character * player, int sd) {
-  printf("Server actually got to setup");
   char buffer[MESSAGE_BUFFER_SIZE];
   int check = 1;
   
   while (check > 0){
-    printf("CLASS_ID: %d",player->CLASS_ID);
     if (player->CLASS_ID == 0){
       write(sd, "no class", MESSAGE_BUFFER_SIZE);
       read(sd, buffer, MESSAGE_BUFFER_SIZE);
-      int classChoice = atoi(buffer); //atoi works?
-      printf("classchoice: %d\n", classChoice);
-      if (classChoice > 3 || classChoice <= 0 ) printf("Invalid Choice!\n");
+      int classChoice = atoi(buffer);
+      if (classChoice > 3 || classChoice <= 0 ) printf("Invalid Choice!");
       else if (classChoice == 1) convertC(player,"1 1 500 100 100 100 100 1 1 1 1");//Warrior
       else if (classChoice == 2) convertC(player,"2 1 500 100 100 100 100 1 1 1 1");//Mage
       else if (classChoice == 3) convertC(player,"3 1 500 100 100 100 100 1 1 1 1");//Hunter
     }
     else if (player->CLASS_ID != 0) {
-      printf("CLASS_ID: %d",player->CLASS_ID);
       write(sd, "classy", MESSAGE_BUFFER_SIZE);
       read(sd, buffer, MESSAGE_BUFFER_SIZE);
       if (!strcmp(buffer, "success")){
         umask(0000);
         int fd = open(player->cname,O_APPEND|O_WRONLY);
         char * a = convertS(player,buffer);
-        char buffer[MESSAGE_BUFFER_SIZE];
-        strcpy(buffer,a);
-        printf("yolo%s\nyolo\n",a);
-        write(fd, buffer ,MESSAGE_BUFFER_SIZE);
+        printf("yolo%s\nyolo",a);
+        write(fd, a ,MESSAGE_BUFFER_SIZE);
         close(fd);
-        printf("end1\n");
-        //return 0;
-        check = 0;
       }
-      printf("end2\n");
-      check = 0;
-      //return 0
     }
   }
 }
-*/
+
 void sub_server( int sd ) {
   character * player = malloc(sizeof(character));
   strcpy(player->cname, "lol");
@@ -598,18 +542,13 @@ void sub_server( int sd ) {
   
   read(sd, buffer, MESSAGE_BUFFER_SIZE);
   if (! strcmp(buffer,"yes")) login(sd, player); //does login procedure
-  else registerr(sd, player);  
+  else registerr(sd, player); //does register procedure
   
-  setup(sd, player);
+  //setup(player, sd);
   
-  printf("Server: Made it past setup\n");
-  
-  
-  //int pid = fork();
-  //if (pid) interpret(sd, player);
-  //else update(sd, player);
-  
-  free(player);
+  int pid = fork();
+  if (pid) interpret(sd, player);
+  else update(sd, player);
   
 }
 
@@ -636,33 +575,3 @@ void process( char * s ) {
     write( sd, buffer, sizeof(buffer));
   }
   */
-  
-
-
-int main() {
-
-  int sd, connection;
-  int count = 0;
-
-  sd = server_setup();
-  
-  int shmd = shmget(420, 1024, IPC_CREAT | 0664);
-  
-  while (1) {
-
-    connection = server_connect( sd );
-
-    int f = fork();
-    if ( f == 0 ) {
-
-      close(sd);
-      sub_server( connection );
-      count +=1;
-      exit(0);
-    }
-    else {
-      close( connection );
-    }
-  }
-  return 0;
-}

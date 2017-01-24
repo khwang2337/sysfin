@@ -98,43 +98,14 @@ void loginC(int sd) {
       check = -3;
     }
     
-    else if (! strcmp(buffer, "successful login")) {
-      check = 0;
-    }
+    else break; //check = 0;
   }
 }
 
-void class_select(int sd) {
-  char buffer[MESSAGE_BUFFER_SIZE] = {0};
-  int check = 1;
-  
-  while (check) {
-    read(sd, buffer, MESSAGE_BUFFER_SIZE);
-    //printf("buffer: %s\n", buffer);
-    if (! strcmp(buffer, "makeclass")) {
-      printf("YES\n");
-      while (check > 0) {
-        printf("What is your preferred class?\n1. Warrior\n2. Mage\n3. Healer\nPick: ");
-        fgets(buffer, MESSAGE_BUFFER_SIZE, stdin);
-        buffer[strlen(buffer) - 1] = 0;
-        if ( (! strcmp(buffer, "1")) || (! strcmp(buffer, "2")) || (! strcmp(buffer, "3"))) {
-          write(sd, buffer, MESSAGE_BUFFER_SIZE);
-          check = 0;
-        }
-      }
-    }
-    else if (! strcmp(buffer, "proceed")) {
-      printf("Class is already decided\n");
-      check = 0;
-    }
-  }
-}
-/*
 void class_select(int sd, char buffer[]){
   int check = 1;
   
   while (check > 0){
-    printf("I will fill your screen.\n");
     read(sd, buffer, MESSAGE_BUFFER_SIZE);
     if (! strcmp(buffer, "no class")) {
       printf("1.Warrior\n2.Mage\n3.Hunter\nChoose your class:");
@@ -142,17 +113,12 @@ void class_select(int sd, char buffer[]){
       write(sd, buffer, MESSAGE_BUFFER_SIZE);
     }
     else if (! strcmp(buffer, "classy")){
-      printf("Class chosen!\n");
+      printf("Class chosen!");
       write(sd,"success",MESSAGE_BUFFER_SIZE);
-      printf("end here\n");
-      //return 0;
       check = 0;
     }
-    printf("END HERE\n");
-    //return 0;
   }
 }
-*/
 
 void chatSYS(int sd, int * chat_set, char * curr_whisp) {
   char buffer[MESSAGE_BUFFER_SIZE];
@@ -162,8 +128,8 @@ void chatSYS(int sd, int * chat_set, char * curr_whisp) {
   
   while (1) {
       if ( (*chat_set) == 0) printf(WHT);
-      //else if ( (*chat_set) == 1) printf(GRN);
-      //else if ( (*chat_set) == 2) printf(MAG);
+      else if ( (*chat_set) == 1) printf(GRN);
+      else if ( (*chat_set) == 2) printf(MAG);
       fgets(buffer, MESSAGE_BUFFER_SIZE, stdin);
       buffer[strlen(buffer) - 1] = 0;
       
@@ -178,7 +144,7 @@ void chatSYS(int sd, int * chat_set, char * curr_whisp) {
         write(sd, buffer, MESSAGE_BUFFER_SIZE);
       }
       else {
-        char * temp = (char *)malloc(MESSAGE_BUFFER_SIZE);
+        char * temp;
         //IS A COMMAND CHECK FOR CERTAIN COMMANDS
         printf("I'm in commandcheck!\n");
         printf("I'm here!\n");
@@ -188,7 +154,7 @@ void chatSYS(int sd, int * chat_set, char * curr_whisp) {
         printf("I'm here!\n");
         command = strsep(&temp, " ");
         printf("I'm here!\n");
-        printf("buffer: %s\n", buffer);
+        
         //if ( (! strcmp(command, "lobby")) || (! strcmp(command, "l")) ) {
         //  *chat_set = 0;
         //}
@@ -202,7 +168,6 @@ void chatSYS(int sd, int * chat_set, char * curr_whisp) {
         
         if (! strcmp(command, "help")) printf("%s\n", HELP);
         else write(sd, buffer, MESSAGE_BUFFER_SIZE);
-        printf("CAN I COME HERE?\n");
       }
       //printf("I'm performing the write\n");
       //printf("sent message %s\n", buffer);
@@ -229,8 +194,8 @@ void ENDCUR(int sd, int * chat_set, char * curr_whisp) { //does graphical displa
       //printf("buffer2: %s\n", buffer2);
       if (strcmp(lead, "/")) { //DO COLORS
         if (! strcmp(lead, "0")) printf(WHT "%s\n" RESET, buffer2);
-        //else if (! strcmp(lead, "1")) printf(GRN "%s\n" RESET, buffer2);
-        //else if (! strcmp(lead, "2")) printf(MAG "%s\n" RESET, buffer2);
+        else if (! strcmp(lead, "1")) printf(GRN "%s\n" RESET, buffer2);
+        else if (! strcmp(lead, "2")) printf(MAG "%s\n" RESET, buffer2);
         else if (! strcmp(lead, "3")) printf(CYN "%s\n" RESET, buffer2);
       }
       else {
@@ -267,16 +232,16 @@ int main( int argc, char *argv[] ) {
   
   int check = opening(sd); //asks whether they have an account
   if (check > 0) registerC(sd); //registers them
-  else loginC(sd);  
+  else loginC(sd); //logs them in
   
-  class_select(sd);
   
   printf("Welcome to the Game.\n" RESET);
+  
   char buffer2[MESSAGE_BUFFER_SIZE];
-  printf("Client: Made it past class_select\n");
-  //int subPID = fork();
-  //if (subPID) chatSYS(sd, chat_set, curr_whisp); //THIS SHOULD WORK RIGHT???
-  //else ENDCUR(sd, chat_set, curr_whisp);
+  //class_select(sd, buffer2);
+  int subPID = fork();
+  if (subPID) chatSYS(sd, chat_set, curr_whisp); //THIS SHOULD WORK RIGHT???
+  else ENDCUR(sd, chat_set, curr_whisp);
   
   return 0;
 }

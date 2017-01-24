@@ -10,7 +10,7 @@
 
 #define MESSAGE_BUFFER_SIZE 50
 
-/*typedef struct partymember {
+typedef struct partymember {
   char does_exist;
   char name[MESSAGE_BUFFER_SIZE];
   struct character * player;
@@ -175,7 +175,7 @@ int heal(int hp_lost,int heal) {
     return (hp_lost - heal);
 }
 
-int attack( character* player,character* target,int move) {
+int attack(int sd, character* player,character* target,int move) {
 //	check player's class;
 //	decrease all the timers on debuff and buffs for both player and target(if a timer reaches zero, turn buff/debuff back to 0)
 //	decrease timers on stun and poison
@@ -392,25 +392,19 @@ int attack( character* player,character* target,int move) {
 	    }
 	    if (move == 4) {                     //Skill Name: Holy Strike
 	        if (player->MOVE4_ID == 1) {     //Description: 1x using mdef + self heal 500
-	            target->HP_LOST += formula(player->MDEF,player->MDEFBUFF,player->MDEFDEB,1,target->MDEF,target->MDEFBUFF,target->MDEFDEB);
+	            target->HP_LOST += formula(player->MDEF,player->MDEFBUFF,player->MDEFDEB,2.5,target->MDEF,target->MDEFBUFF,target->MDEFDEB);
 	            player->HP_LOST = heal(player->HP_LOST,500);
 	        }
-	        if (player->MOVE4_ID == 2) {     //Description: 1x using mdef + self heal 500 + self buff 1.5 MDEF/DEF
-	            target->HP_LOST += formula(player->MDEF,player->MDEFBUFF,player->MDEFDEB,1,target->MDEF,target->MDEFBUFF,target->MDEFDEB);
-	            player->HP_LOST = heal(player->HP_LOST,500);
-	            player->MDEFBUFF = .5;
-	            player->MDEFBUFF_TURNS = 3;
-	            player->DEFBUFF = .5;
-	            player->DEFBUFF_TURNS = 3;
+	        if (player->MOVE4_ID == 2) {     //Description: 1x using mdef + magical atk + self heal 500 + self buff 1.5 MDEF/DEF
+	            
 	        }
 	        if (player->MOVE4_ID == 3) {     //Description: 2x using mdef + self heal 2000
-	            target->HP_LOST += formula(player->MDEF,player->MDEFBUFF,player->MDEFDEB,2,target->MDEF,target->MDEFBUFF,target->MDEFDEB);
-	            player->HP_LOST = heal(player->HP_LOST,200);
+	            
 	        }
 	    }
 	}
 	
-	//CLASS: Assassin
+	//CLASS: Assassin? Hunter? Guardian? Whatever?
 /*	if (cID == 4) {
 	    if (move == 1) {                     //Skill Name: 
 	        if (player->MOVE1_ID == 1) {     //Description:
@@ -476,7 +470,7 @@ void action(character *player, int sd, int a, int b) {
 }
 
 //literally only sets everything up
-/*void startBattle(party * p,character *enemy, character *attacker, int move, int target) {
+void startBattle(party p,character *enemy, character *attacker, int move, int target) {
     srand(time(NULL));
     int deathCount = 0;
     int inProgress = 1;
@@ -492,7 +486,7 @@ void action(character *player, int sd, int a, int b) {
     /*for(k;k<sizeof(party);k++) {
             if(isDead(party->)) deathCount ++;
         }*/
-/*       if(deathCount == sizeof(party)) {
+        if(deathCount == sizeof(party)) {
             printf("All your party members are dead!\n");
         }
         deathCount = 0;
@@ -502,98 +496,10 @@ void action(character *player, int sd, int a, int b) {
             printf("Enemy is eliminated!\n");
         }
     }
-} */
-/*void levelup(character * player) {
-    
-} */
-
-int startBattle( party * p, character * enemy){
-	printf("Battle starting against %s!\n", enemy->cname);
-	shmrd = shmget(500,MESSAGE_BUFFER_SIZE,IPC_CREAT|0644);
-	shmwr = shmget(501,MESSAGE_BUFFER_SIZE,IPC_CREAT|0644);
-	// int count = 0;
-	while (1){
-		if (p->leader->HP>0){
-			printf("%s's Turn!\n", p->leader->name);
-			char ** cmess = shmat(shmwr,0,0);
-			strcpy(cmess, "leader's turn!:\n");
-			// read and attack
-			//print out moves?
-			int * choice = shmat(shmrd,0,0);
-			attack(p->leader->player,enemy,choice);
-			shmdt(cmess);
-			shmdt(choice);
-		}
-		
-		if(enemy->HP==0){
-			//end battle
-		}
-		
-		if (p->mate1->HP>0){
-			printf("%s's Turn!\n", p->mate1->name);
-			char ** cmess = shmat(shmwr,0,0);
-			strcpy(cmess, "mate1's turn!:\n");
-			// read and attack
-			
-			int * choice = shmat(shmrd,0,0);
-			attack(p->mate1->player,enemy,choice);
-			shmdt(cmess);
-			shmdt(choice);
-		}
-		
-		if(enemy->HP==0){
-			//end battle
-		}
-		
-		if (p->mate2->HP>0){
-			printf("%s's Turn!\n", p->mate2->name);
-			char ** cmess = shmat(shmwr,0,0);
-			strcpy(cmess, "mate2's turn!:\n");
-			// read and attack
-			
-			int * choice = shmat(shmrd,0,0);
-			attack(p->mate2->player,enemy,choice);
-			shmdt(cmess);
-			shmdt(choice);
-		}
-		
-		if(enemy->HP==0){
-			//end battle
-		}
-		
-		if (p->mate3->HP>0){
-			printf("%s's Turn!\n", p->mate3->name);
-			char ** cmess = shmat(shmwr,0,0);
-			strcpy(cmess, "mate3's turn!:\n");
-			// read and attack
-			
-			int * choice = shmat(shmrd,0,0);
-			attack(p->mate3->player,enemy,choice);
-			shmdt(cmess);
-			shmdt(choice);
-		}
-		
-		if(enemy->HP==0){
-			//end battle, players win
-			return 1;
-		}
-		
-		printf("%s's Turn!\n", enemy->cname);
-		char ** cmess = shmat(shmwr,0,0);
-		strcpy(cmess, "enemy's turn!:\n");
-		// read and attack
-		attack(enemy,mate1,1);
-		shmdt(cmess);
-		shmdt(choice);
-		
-		if((p->leader->HP==0)&&(p->mate1->HP==0)&&(p->mate2->HP==0)&&(p->mate3->HP==0)){
-			//end battle, players lose
-			return 0;
-		}
-	}
 }
-
-
+void levelup(character * player) {
+    
+}
 
 void startDungeon(int sd, party * p, int dungeonDifficulty) {
     printf("You have entered %d\n", dungeonDifficulty);//welcome msg, subject to change
@@ -628,16 +534,10 @@ void startDungeon(int sd, party * p, int dungeonDifficulty) {
             else {
                 processStats(*enemy,line);
                 printf("You have encountered %s!\n",enemy->cname);
-                if(!startBattle(p, enemy)){
-                	//players lost, restart?
-                }
-                else{
-                	//players won, next battle
-                }
+                //startBattle( );
             }
         }
         printf("You have conquered the dungeon!\n\n Returning to lobby.....");
     }
     //code to disband everyone from party
 }
-

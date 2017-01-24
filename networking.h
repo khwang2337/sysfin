@@ -1,7 +1,7 @@
 #ifndef NETWORKING_H
 #define NETWORKING_H
 
-#define MESSAGE_BUFFER_SIZE 200
+#define MESSAGE_BUFFER_SIZE 50
 
 #define HELP "" //FILL IN HELP
 
@@ -42,7 +42,6 @@ typedef struct character {
   char cname[MESSAGE_BUFFER_SIZE];
   int CLASS_ID;
   int DUNGEON;
-  
   
   float HP;
   float HP_LOST;
