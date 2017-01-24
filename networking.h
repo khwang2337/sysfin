@@ -5,17 +5,28 @@
 
 #define HELP "" //FILL IN HELP
 
+#define RED   "\x1B[31m"
+#define GRN   "\x1B[32m"
+#define YEL   "\x1B[33m"
+#define BLU   "\x1B[34m"
+#define MAG   "\x1B[35m"
+#define CYN   "\x1B[36m"
+#define WHT   "\x1B[37m"
+#define RESET "\x1B[0m"
+
 typedef struct partymember {
   char does_exist;
   char name[MESSAGE_BUFFER_SIZE];
+  struct character * player;
   int is_ready;
 } partymember;
 
 typedef struct party {
-  char * leader_name;
+  partymember leader;
   partymember mate1;
   partymember mate2;
   partymember mate3;
+  //dungeon curr_dungeon;
   int size;
 } party;
 
@@ -24,21 +35,21 @@ typedef struct character {
   int CLASS_ID;
   int DUNGEON;
   
-  int HP;
-  int HP_LOST;
-  int ATK;
-  int MATK;
-  int DEF;
-  int MDEF;
+  float HP;
+  float HP_LOST;
+  float ATK;
+  float MATK;
+  float DEF;
+  float MDEF;
   
   int MOVE1_ID;
   int MOVE2_ID;
   int MOVE3_ID;
   int MOVE4_ID;
-  //Player only
+  //Player only    what is this?
   int DC;
   //int current_chat;
-  char latest_cname[MESSAGE_BUFFER_SIZE]; //IMPLEMENT IN UPDATE
+  char last_whisp[MESSAGE_BUFFER_SIZE]; //IMPLEMENT IN UPDATE
   char last_message[MESSAGE_BUFFER_SIZE];
   int in_party; //may not need
   int party_key;
@@ -59,28 +70,44 @@ typedef struct character {
   int STUN;
   int STUN_TURN;
   
-  int ATKBUFF;
+  float ATKBUFF;
   int ATKBUFF_TURNS;
-  int MATKBUFF;
+  float MATKBUFF;
   int MATKBUFF_TURNS;
-  int DEFBUFF;
+  float DEFBUFF;
   int DEFBUFF_TURNS;
-  int MDEFBUFF;
+  float MDEFBUFF;
   int MDEFBUFF_TURNS;
   
-  int ATKDEB;
+  float ATKDEB;
   int ATKDEB_TURNS;
-  int MATKDEB;
+  float MATKDEB;
   int MATKDEB_TURNS;
-  int DEFDEB;
+  float DEFDEB;
   int DEFDEB_TURNS;
-  int MDEFDEB;
+  float MDEFDEB;
   int MDEFDEB_TURNS;
   
 } character;
 
+//struct charSTATS
+
+/*
+struct dungeon {
+  charSTATS leadSTATS;
+  charSTATS mate1STATS;
+  charSTATS mate2STATS;
+  charSTATS mate3STATS;
+  int turn;
+  enemy ENEMY;
+}
+
+struct enemy {
+  STATS
+}
 
 
+*/
 
 
 

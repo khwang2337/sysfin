@@ -8,23 +8,101 @@
 #include <sys/shm.h>
 #include <time.h>
 
+#define MESSAGE_BUFFER_SIZE 50
+
+typedef struct partymember {
+  char does_exist;
+  char name[MESSAGE_BUFFER_SIZE];
+  struct character * player;
+  int is_ready;
+} partymember;
+
+typedef struct party {
+  partymember leader;
+  partymember mate1;
+  partymember mate2;
+  partymember mate3;
+  //dungeon curr_dungeon;
+  int size;
+} party;
+
+typedef struct character {
+  char cname[MESSAGE_BUFFER_SIZE];
+  int CLASS_ID;
+  int DUNGEON;
+  
+  int HP;
+  int HP_LOST;
+  int ATK;
+  int MATK;
+  int DEF;
+  int MDEF;
+  
+  int MOVE1_ID;
+  int MOVE2_ID;
+  int MOVE3_ID;
+  int MOVE4_ID;
+  //Player only
+  int DC;
+  //int current_chat;
+  char latest_cname[MESSAGE_BUFFER_SIZE]; //IMPLEMENT IN UPDATE
+  char last_message[MESSAGE_BUFFER_SIZE];
+  int in_party; //may not need
+  int party_key;
+  party * Party;
+  
+  //Enemy only
+  int CD;
+  int CD_NOW;
+  int ELEMENT;
+  int MOVE5_ID;
+  int MOVE6_ID;
+  
+  //For battle only
+  int DEAD;
+  
+  int DOT;
+  int DOT_TURN;
+  int STUN;
+  int STUN_TURN;
+  
+  int ATKBUFF;
+  int ATKBUFF_TURNS;
+  int MATKBUFF;
+  int MATKBUFF_TURNS;
+  int DEFBUFF;
+  int DEFBUFF_TURNS;
+  int MDEFBUFF;
+  int MDEFBUFF_TURNS;
+  
+  int ATKDEB;
+  int ATKDEB_TURNS;
+  int MATKDEB;
+  int MATKDEB_TURNS;
+  int DEFDEB;
+  int DEFDEB_TURNS;
+  int MDEFDEB;
+  int MDEFDEB_TURNS;
+  
+} character;
+
 /*
 IN FILE:
 password
 cname
-player.CLASS_ID
-player.DUNGEON   
-player.HP
-player.ATK
-player.MATK
-player.DEF
-player.MDEF
-player.MOVE1_ID
-player.MOVE2_ID
-player.MOVE3_ID
-player.MOVE4_ID
+player->CLASS_ID
+player->DUNGEON   
+player->HP
+player->ATK
+player->MATK
+player->DEF
+player->MDEF
+player->MOVE1_ID
+player->MOVE2_ID
+player->MOVE3_ID
+player->MOVE4_ID
 */
-int endDungeon(int a){
+int endDungeon(int a) {
     return !a;
 }
 //LOL had this in server already btw
@@ -47,193 +125,395 @@ void convertC(character *player, char *info) {
 
 
 /*
-void processStats(character a, char stats){
-    if(counter ==1){
+void processStats(character a, char stats) {
+    if(counter ==1) {
         a.cname = stats;
     }
-    if(counter == 2){
+    if(counter == 2) {
         a.HP = atoi(stats);
     }
-    if(counter ==3){
+    if(counter ==3) {
         a.ATK = atoi(stats);
     }
-    if(counter ==4){
+    if(counter ==4) {
         a.MATK = atoi(stats);
     }
-    if(counter ==5){
+    if(counter ==5) {
         a.DEF = atoi(stats);
     }
-    if(counter ==6){
+    if(counter ==6) {
         a.MOVE1_ID = atoi(stats);
     }
-    if(counter ==7){
+    if(counter ==7) {
         a.MOVE2_ID = atoi(stats);
     }
-    if(counter ==8){
+    if(counter ==8) {
         a.MOVE3_ID = atoi(stats);
     }
-    if(counter ==9){
+    if(counter ==9) {
         a.MOVE4_ID = atoi(stats);
     }
 }
 */
 
-int isDead(character a){
-    if(a.HP ==0){
+int isDead(character* a) {
+    if(a->HP ==0) {
         return 1;
     }
     else{
         return 0;
     }
 }
-int formula(int atk, int atkbuff,int atkdeb,int multipler,int def,int defbuff,int defdeb){
+int formula(int atk, int atkbuff,int atkdeb,int multipler,int def,int defbuff,int defdeb) {
     return ((atk * atk * (1-atkdeb) * (1+atkbuff)*multipler)/(def * defbuff * defdeb));
 }
 
-int attack(character* player,character* target,int move){
+int heal(int hp_lost,int heal) {
+    if (hp_lost < heal) {
+        return 0;
+    }
+    return (hp_lost - heal);
+}
+
+int attack(int sd, character* player,character* target,int move) {
 //	check player's class;
 //	decrease all the timers on debuff and buffs for both player and target(if a timer reaches zero, turn buff/debuff back to 0)
 //	decrease timers on stun and poison
 
-    int cID = player.classID;
-	if (cID == 1){
-	    check//Let's pretend 1 is "Warrior"
-		 if (move == 1){					//This would be "Swing"
-		 	if (player.MOVE1_ID == 1) {			//This would be base skill
-				target.HP_LOST += formula(player.ATK,player.ATKBUFF,player.ATKDEB,1,target.DEF,target.DEFBUFF,target.DEFDEB)
+    int cID = player->CLASS_ID;
+    //CLASS: Warrior
+	if (cID == 1) {
+		if (move == 1) {                     //Skill Name: Swing			
+		    if (player->MOVE1_ID == 1) {	 //Description: physical attack
+				target->HP_LOST += formula(player->ATK,player->ATKBUFF,player->ATKDEB,1,target->DEF,target->DEFBUFF,target->DEFDEB);
 			}
-			if (player.MOVE1_ID == 2) {			//This would be branch 1 of first upgrade. "Swing Break"
-				target.HP_LOST += ......
-				target.DEFDEB = 20;
-				target.DEFDEB_TURNS = 3;
+			if (player->MOVE1_ID == 2) {	 //Description: physical attack with defense debuff 
+				target->HP_LOST += 0;
+				target->DEFDEB = 20;
+				target->DEFDEB_TURNS = 3;
 			}
-			if player.MOVE1_ID == 3) {			//This would be branch 2 of first upgrade. "Heavy Swing"
-				target.HP_LOST += ......
-				//More damage or something
+			if (player->MOVE1_ID == 3) {	 //Description: physical attack with attack buff
+				target->HP_LOST += 0;
+				player->ATKBUFF = 0.2;
+				player->ATKBUFF_TURNS = 1;
 			}
-			//ETC.
+		}
+	    if (move == 2) {                     //Skill Name: Armor up
+	        if (player->MOVE2_ID == 1) {     //Description: Raises Def Buff by 1.2 times
+	            player->DEFBUFF = 1.2;
+	            player->DEFBUFF_TURNS = 3;
+	        }
+	        if (player->MOVE2_ID == 2) {     //Description: Magic Def up by  1.3
+	            player->MDEFBUFF = 1.3;
+	            player->MDEFBUFF_TURNS = 3;
+	        }
+	        if (player->MOVE2_ID == 3) {     //Description: Phys and Mag Def up by 1.1
+	            player->DEFBUFF = 1.1;
+	            player->DEFBUFF_TURNS = 3;
+	            player->MDEFBUFF = 1.1;
+	            player->MDEFBUFF_TURNS = 3;
+	        }
+	    }
+	    if (move == 3) {                     //Skill Name: Armor break
+	        if (player->MOVE3_ID == 1) {     //Description: Deals .8 damage + lowers enemy DEF by 20
+	            player->ATKDEB = 0.2;
+	            player->ATKDEB_TURNS = 1;
+	            target->HP_LOST+=0;
+	            target->DEFDEB = 20;
+	            target->DEFDEB_TURNS = 2;
+	        }
+	        if (player->MOVE3_ID == 2) {     //Description: Deals .75 damage + stuns enemy for 2 turn 
+	            player->ATKDEB = 0.25;
+	            player->ATKDEB_TURNS = 1;
+	            target->HP_LOST +=0;
+	            target->STUN = 1;
+	            target->STUN_TURN = 2;
+	        }
+	        if (player->MOVE3_ID == 3) {     //Description: Deal .1 damage + destorys the enemy def and sets it to zero for 3 turns.
+	            player->ATKDEB = 0.9;
+	            player->ATKDEB_TURNS = 1;
+	            target->HP_LOST +=0;
+	            target->DEFDEB = (1/(target->DEF + (target->DEFBUFF)));
+	            target->DEFDEB_TURNS = 3;
+	        }
+	    }
+	    if (move == 4) {                     //Skill Name: Final Stand
+	        if (player->MOVE4_ID == 1) {     //Description:Deal tons of damage to enemy(60% of hp) but reduce own hp by .50
+	            target->HP_LOST+=0;
+	            player->HP_LOST+=0;
+	        }
+	        if (player->MOVE4_ID == 2) {     //Description:Raise own def by 10x, lowers atk by 5x
+	            player->DEFBUFF = player->DEF * 10;
+	            player->DEFBUFF_TURNS = 3;
+	            player->ATKBUFF = player->ATK / 5;
+	            player->ATKBUFF_TURNS = 3;
+	        }
+	        if (player->MOVE4_ID == 3) {     //Description:Deals fatal damage(99% of hp) but reduce hp by .80
+	            target->HP_LOST+=0;
+	            player->HP_LOST+=0;
+	        }
+	    }
 	}
-	if (cID == 2){
-		.....
+	
+	//CLASS: Mage
+	if (cID == 2) {
+	    if (move == 1) {                     //Skill Name: Fire ball
+	        if (player->MOVE1_ID == 1) {     //Description:Deal 1.0 mag atk
+	            target->HP_LOST+=;
+	        }
+	        if (player->MOVE1_ID == 2) {     //Description:Deal 1.0 mag atk with mag buff(1.3x) for 2 turns
+	            target->HP_LOST+=0;
+	            player->MATKBUFF = player->MATK * 1.3
+	        }
+	        if (player->MOVE1_ID == 3) {     //Description:Deal 1.1 mag atk and stuns enemy for 1 turn
+	            
+	        }
+	    }
+	    if (move == 2) {                     //Skill Name: Poison blast
+	        if (player->MOVE2_ID == 1) {     //Description:Does no dmg but applies a DOT (1.3x) for 6 turns(ignores def)
+	            
+	        }
+	        if (player->MOVE2_ID == 2) {     //Description:Deals 1.2 initial damage and applies DOT(1.3) for 3 turns(ignores def)
+	            
+	        }
+	        if (player->MOVE2_ID == 3) {     //Description:Deals 10x mag atk over 4 turns
+	            
+	        }
+	    }
+	    if (move == 3) {                     //Skill Name: Ice storm
+	        if (player->MOVE3_ID == 1) {     //Description: stuns enemy for 2 turns
+	            
+	        }
+	        if (player->MOVE3_ID == 2) {     //Description: Deals 1.5x damage if enemy is cced and prolong any stun for 1 turn
+	            
+	        }
+	        if (player->MOVE3_ID == 3) {     //Description: deals 4x damage over 2 turns and stun for 1 turn
+	            
+	        }
+	    }
+	    if (move == 4) {                     //Skill Name: Meteor
+	        if (player->MOVE4_ID == 1) {     //Description: 2.5 Magic atk + self stun 1 turn
+	            
+	        }
+	        if (player->MOVE4_ID == 2) {     //Description: 6 magic atk + self stun 2 turn
+	            
+	        }
+	        if (player->MOVE4_ID == 3) {     //Description: 3 magic atk 
+	            
+	        }
+	    }
 	}
-	if(player->ATKBUFF_TURNS > 0) (player->ATKBUFF_TURNS)--;
-	if(player->)
+	
+	//CLASS: Healer
+	if (cID == 3) {
+	    if (move == 1) {                     //Skill Name: Cleanse
+	        if (player->MOVE1_ID == 1) {     //Description: removes all statuses
+	            target->ATKDEB == 0;
+	            target->ATKDEB_TURNS == 0;
+	            target->MATKDEB == 0;
+	            target->MATKDEB_TURNS == 0;
+	            target->DEFDEB == 0;
+	            target->DEFDEB_TURNS == 0;
+	            target->MDEFDEB == 0;
+	            target->MDEFDEB_TURNS == 0;
+	        }
+	        if (player->MOVE1_ID == 2) {     //Description: remove all statuses + heal
+	            target->ATKDEB == 0;
+	            target->ATKDEB_TURNS == 0;
+	            target->MATKDEB == 0;
+	            target->MATKDEB_TURNS == 0;
+	            target->DEFDEB == 0;
+	            target->DEFDEB_TURNS == 0;
+	            target->MDEFDEB == 0;
+	            target->MDEFDEB_TURNS == 0;
+	            
+	            target->HP_LOST = heal(target->HP_LOST,1000);
+	        }
+	        if (player->MOVE1_ID == 3) {     //Description: remove all statuses + buff atk/matk
+	            target->ATKDEB == 0;
+	            target->ATKDEB_TURNS == 0;
+	            target->MATKDEB == 0;
+	            target->MATKDEB_TURNS == 0;
+	            target->DEFDEB == 0;
+	            target->DEFDEB_TURNS == 0;
+	            target->MDEFDEB == 0;
+	            target->MDEFDEB_TURNS == 0;
+	            
+	            target->ATKBUFF == 20;
+	            target->ATKBUFF_TURNS == 3;
+	            target->MATKBUFF == 20;
+	            target->MATKBUFF_TURNS == 3;
+	        }
+	    }
+	    if (move == 2) {                     //Skill Name: Heal
+	        if (player->MOVE2_ID == 1) {     //Description: Heal 1000 health
+	            
+	        }
+	        if (player->MOVE2_ID == 2) {     //Description: Heal party 1000 health
+	            
+	        }
+	        if (player->MOVE2_ID == 3) {     //Description: Heal 3000 health
+	            
+	        }
+	    }
+	    if (move == 3) {                     //Skill Name: Divine Protection
+	        if (player->MOVE3_ID == 1) {     //Description: AOE 1.2 MDEF buff
+	            
+	        }
+	        if (player->MOVE3_ID == 2) {     //Description: AOE 1.2 MDEF/DEF buff
+	            
+	        }
+	        if (player->MOVE3_ID == 3) {     //Description: AOE 1.2 MDEF/MATK buff
+	            
+	        }
+	    }
+	    if (move == 4) {                     //Skill Name: Holy Strike
+	        if (player->MOVE4_ID == 1) {     //Description: .5 magical atk + self heal 500
+	            
+	        }
+	        if (player->MOVE4_ID == 2) {     //Description: .5 magical atk + self heal 500 + self buff 1.5 MDEF/DEF
+	            
+	        }
+	        if (player->MOVE4_ID == 3) {     //Description: 1.2 magical atk + self heal 2000
+	            
+	        }
+	    }
+	}
+	
+	//CLASS: Assassin? Hunter? Guardian? Whatever?
+/*	if (cID == 4) {
+	    if (move == 1) {                     //Skill Name: 
+	        if (player->MOVE1_ID == 1) {     //Description:
+	            
+	        }
+	        if (player->MOVE1_ID == 2) {     //Description:
+	            
+	        }
+	        if (player->MOVE1_ID == 3) {     //Description:
+	            
+	        }
+	    }
+	    if (move == 2) {                     //Skill Name: 
+	        if (player->MOVE2_ID == 1) {     //Description:
+	            
+	        }
+	        if (player->MOVE2_ID == 2) {     //Description:
+	            
+	        }
+	        if (player->MOVE2_ID == 3) {     //Description:
+	            
+	        }
+	    }
+	    if (move == 3) {                     //Skill Name: 
+	        if (player->MOVE3_ID == 1) {     //Description:
+	            
+	        }
+	        if (player->MOVE3_ID == 2) {     //Description:
+	            
+	        }
+	        if (player->MOVE3_ID == 3) {     //Description:
+	            
+	        }
+	    }
+	    if (move == 4) {                     //Skill Name: 
+	        if (player->MOVE4_ID == 1) {     //Description:
+	            
+	        }
+	        if (player->MOVE4_ID == 2) {     //Description:
+	            
+	        }
+	        if (player->MOVE4_ID == 3) {     //Description:
+	            
+	        }
+	    }
+	}*/
 }
-void action(character player, int sd, int a, int b){
-    int move;
-    if (a == 1) move = player.MOVE1_ID;
-    if (a == 2) move = player.MOVE2_ID;
-    if (a == 3) move = player.MOVE3_ID;
-    if (a == 4) move = player.MOVE4_ID;
-    int type = check(player.CLASS_ID,move);
+
+//int check();
     
-    //single + buff 
-    if (type == 0) move(sd, player, player, a, b, 0);
-    if (type == 1) move(sd, player, player, a, b, 1);
-    if (type == 2) move(sd, player, enemy, a, b, 2);
+void action(character *player, int sd, int a, int b) {
+    int move;
+    if (a == 1) move = player->MOVE1_ID;
+    if (a == 2) move = player->MOVE2_ID;
+    if (a == 3) move = player->MOVE3_ID;
+    if (a == 4) move = player->MOVE4_ID;
+    int type = check(player->CLASS_ID,move);
+    
+    //single + buff
+    if (type == 1) {
+        
+    }
 }
 
 //literally only sets everything up
-void startBattle(character party[],character enemy, character attacker, int move, int target){
+void startBattle(party p,character *enemy, character *attacker, int move, int target) {
     srand(time(NULL));
     int deathCount = 0;
     int inProgress = 1;
-    if (enemy.CD_NOW == 0){
+    //int k;
+    while(!isDead(enemy)){
+    if (enemy->CD_NOW == 0) {
         int r = rand()%5;
-        determine (enemy, party, enemy, r);
-        enemy.CD_NOW = enemy.CD;
+        //determine (enemy, party, enemy, r);
+        enemy->CD_NOW = enemy->CD;
     }
         
     //Checks for death of party
-    for(k;k<sizeof(party);k++){
-        if(isDead(party[k])) deathCount ++;
-    }
-    if(deathCount == sizeof(party)){
-        printf("All your party members are dead!\n");
-        return 0;
-    }
-    deathCount = 0;
-    
-    //Checks for death of enemy
-    if (isDead(enemy)){
-        return 2;
+    /*for(k;k<sizeof(party);k++) {
+            if(isDead(party->)) deathCount ++;
+        }*/
+        if(deathCount == sizeof(party)) {
+            printf("All your party members are dead!\n");
+        }
+        deathCount = 0;
+        
+        //Checks for death of enemy
+        if (isDead(enemy)) {
+            printf("Enemy is eliminated!\n");
+        }
     }
 }
+void levelup(character * player) {
+    
+}
 
-void startDungeon(character player, int dungeonDifficulty){
+void startDungeon(int sd, party * p, int dungeonDifficulty) {
     printf("You have entered %d\n", dungeonDifficulty);//welcome msg, subject to change
     chdir("dungeons");
-    char dungeonName[];
+    char *dungeonName;
     char *enemyStat;
-    character enemy
+    character *enemy;
     
-    if(dungeonDifficulty ==1){
+    if(dungeonDifficulty ==1) {
         strcpy(dungeonName,"dungeon1.txt");
-        player.DUNGEON = 1;
     }
-    else if(dungeonDifficulty ==2){
+    else if(dungeonDifficulty ==2) {
         strcpy(dungeonName,"dungeon2.txt");
-        player.DUNGEON = 2;
     }
     else{
         strcpy(dungeonName,"dungeon3.txt");
-        player.DUNGEON = 3;
     }
         
     FILE *fd = fopen(dungeonName, "r");
     int counter = 0;
-    int numberOfFloors = 0;
-    char *enemy;
-    int statCounter = 0;
-    if(file != NULL){
+    if (fd != NULL) {
         char *line;
-        while(fgets(line,sizeof(line),fp)!=NULL){
+        while(fgets (line, sizeof(line),fd) != NULL) {
+            
             counter++;
-            if (!(counter%2) && counter > 1){
-                processStats(*enemy,line);
-                printf("You have encountered %s!\n",enemy.cname);
-                numberOfFloors--;
-            }
-            if(counter == 1){
-                numberofFloors = atoi(line);
-            }
-            if(!strcmp("Floor 1",line)){
-                printf("This is the first floor\n");
-            }
-            if(endDungeon(numberOfFloors)){
-                printf("You have reached the end of %s\n",dungeonName);
-            }
-            if(!strcmp("Floor 2",line)){
-                printf("This is the second floor\n");
-            }
-            startBattle(character party[],enemy);
-            numberOfFloors --;
-            if(endDungeon(numberOfFloors)){
-               printf("You have reached the end of %s\n",dungeonName); 
-            }
-            if(!strcmp("Floor 3",line)){
-                printf("This is the third floor\n");
-            }
-                        strcpy(enemyStat,line);
-            char * token;
-            const char* str = strdup(enemy);
-            while((token = strsep(&str," "))){
-                statCounter++;
-                processStats(enemy,*token,statCounter);
-            }
-            printf("You have encountered %s!\n",enemy.cname);
-            startBattle(character party[],enemy);
-            numberOfFloors --;
-            if(endDungeon(numberOfFloors)){
-               printf("You have reached the end of %s\n",dungeonName); 
+            char * first = strsep(&line, " ");
+            
+            if(!strcmp("Floor",first)) {
+                printf("Floor %s", line);
             }
             
+            else {
+                processStats(*enemy,line);
+                printf("You have encountered %s!\n",enemy->cname);
+                //startBattle( );
+            }
         }
-        printf("You have conquered the dungeon!\n Returning to lobby");
-        
+        printf("You have conquered the dungeon!\n\n Returning to lobby.....");
     }
-    
-    char buffer[MESSAGE_BUFFER_SIZE];
-    
-    read(fd,buffer,MESSAGE_BUFFER_SIZE);
+    //code to disband everyone from party
 }
