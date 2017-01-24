@@ -29,7 +29,15 @@ typedef struct party {
   //dungeon curr_dungeon;
   int size;
 } party;
-
+/*
+typedef struct dungeon {
+  party p;
+  int turn;
+  character boss1;
+  character boss2;
+  character boss3;
+} dungeon;
+*/
 typedef struct character {
   char cname[MESSAGE_BUFFER_SIZE];
   int CLASS_ID;

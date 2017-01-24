@@ -187,70 +187,64 @@ int attack(int sd, character* player,character* target,int move) {
 		    if (player->MOVE1_ID == 1) {	 //Description: physical attack
 				target->HP_LOST += formula(player->ATK,player->ATKBUFF,player->ATKDEB,1,target->DEF,target->DEFBUFF,target->DEFDEB);
 			}
-			if (player->MOVE1_ID == 2) {	 //Description: physical attack with defense debuff 
-				target->HP_LOST += 0;
-				target->DEFDEB = 20;
+			if (player->MOVE1_ID == 2) {	 //Description: 1.2 physical attack with defense debuff 
+				target->HP_LOST += formula(player->ATK,player->ATKBUFF,player->ATKDEB,1.2,target->DEF,target->DEFBUFF,target->DEFDEB);
+				target->DEFDEB = 0.2;
 				target->DEFDEB_TURNS = 3;
 			}
-			if (player->MOVE1_ID == 3) {	 //Description: physical attack with attack buff
-				target->HP_LOST += 0;
+			if (player->MOVE1_ID == 3) {	 //Description: 1.2 physical attack with attack buff
+				target->HP_LOST += formula(player->ATK,player->ATKBUFF,player->ATKDEB,1.2,target->DEF,target->DEFBUFF,target->DEFDEB);
 				player->ATKBUFF = 0.2;
 				player->ATKBUFF_TURNS = 1;
 			}
 		}
 	    if (move == 2) {                     //Skill Name: Armor up
-	        if (player->MOVE2_ID == 1) {     //Description: Raises Def Buff by 1.2 times
-	            player->DEFBUFF = 1.2;
+	        if (player->MOVE2_ID == 1) {     //Description: Raises Def Buff by 1.3 times
+	            player->DEFBUFF = 0.3;
 	            player->DEFBUFF_TURNS = 3;
 	        }
-	        if (player->MOVE2_ID == 2) {     //Description: Magic Def up by  1.3
-	            player->MDEFBUFF = 1.3;
+	        if (player->MOVE2_ID == 2) {     //Description: Magic Def up by  1.5
+	            player->MDEFBUFF = 0.5;
 	            player->MDEFBUFF_TURNS = 3;
 	        }
-	        if (player->MOVE2_ID == 3) {     //Description: Phys and Mag Def up by 1.1
-	            player->DEFBUFF = 1.1;
+	        if (player->MOVE2_ID == 3) {     //Description: Phys and Mag Def up by 1.3
+	            player->DEFBUFF = 0.3;
 	            player->DEFBUFF_TURNS = 3;
-	            player->MDEFBUFF = 1.1;
+	            player->MDEFBUFF = 0.3;
 	            player->MDEFBUFF_TURNS = 3;
 	        }
 	    }
 	    if (move == 3) {                     //Skill Name: Armor break
 	        if (player->MOVE3_ID == 1) {     //Description: Deals .8 damage + lowers enemy DEF by 20
-	            player->ATKDEB = 0.2;
-	            player->ATKDEB_TURNS = 1;
-	            target->HP_LOST+=0;
-	            target->DEFDEB = 20;
+	            target->HP_LOST += formula(player->ATK,player->ATKBUFF,player->ATKDEB,.8,target->DEF,target->DEFBUFF,target->DEFDEB);
+	            target->DEFDEB = 0.2;
 	            target->DEFDEB_TURNS = 2;
 	        }
 	        if (player->MOVE3_ID == 2) {     //Description: Deals .75 damage + stuns enemy for 2 turn 
-	            player->ATKDEB = 0.25;
-	            player->ATKDEB_TURNS = 1;
-	            target->HP_LOST +=0;
+	            target->HP_LOST += formula(player->ATK,player->ATKBUFF,player->ATKDEB,.75,target->DEF,target->DEFBUFF,target->DEFDEB);
 	            target->STUN = 1;
 	            target->STUN_TURN = 2;
 	        }
-	        if (player->MOVE3_ID == 3) {     //Description: Deal .1 damage + destorys the enemy def and sets it to zero for 3 turns.
-	            player->ATKDEB = 0.9;
-	            player->ATKDEB_TURNS = 1;
-	            target->HP_LOST +=0;
-	            target->DEFDEB = (1/(target->DEF + (target->DEFBUFF)));
+	        if (player->MOVE3_ID == 3) {     //Description: Deal .1 damage + destorys the enemy def and sets it to half for 3 turns.
+	            target->HP_LOST += formula(player->ATK,player->ATKBUFF,player->ATKDEB,.1,target->DEF,target->DEFBUFF,target->DEFDEB);
+	            target->DEFDEB = 1;
 	            target->DEFDEB_TURNS = 3;
 	        }
 	    }
 	    if (move == 4) {                     //Skill Name: Final Stand
-	        if (player->MOVE4_ID == 1) {     //Description:Deal tons of damage to enemy(60% of hp) but reduce own hp by .50
-	            target->HP_LOST+=0;
-	            player->HP_LOST+=0;
+	        if (player->MOVE4_ID == 1) {     //Description:Deal tons of damage to enemy(5) but reduce own hp by .25
+	            target->HP_LOST += formula(player->ATK,player->ATKBUFF,player->ATKDEB,5,target->DEF,target->DEFBUFF,target->DEFDEB);
+	            player->HP_LOST -= ((player->HP)/4);
 	        }
 	        if (player->MOVE4_ID == 2) {     //Description:Raise own def by 10x, lowers atk by 5x
-	            player->DEFBUFF = player->DEF * 10;
+	            player->DEFBUFF = 10;
 	            player->DEFBUFF_TURNS = 3;
-	            player->ATKBUFF = player->ATK / 5;
-	            player->ATKBUFF_TURNS = 3;
+	            player->ATKDEB = .8;
+	            player->ATKDEB_TURNS = 3;
 	        }
-	        if (player->MOVE4_ID == 3) {     //Description:Deals fatal damage(99% of hp) but reduce hp by .80
-	            target->HP_LOST+=0;
-	            player->HP_LOST+=0;
+	        if (player->MOVE4_ID == 3) {     //Description:Deals fatal damage(10) but reduce hp by .50
+	            target->HP_LOST += formula(player->ATK,player->ATKBUFF,player->ATKDEB,10,target->DEF,target->DEFBUFF,target->DEFDEB);
+	            player->HP_LOST -= ((player->HP)/2);
 	        }
 	    }
 	}
@@ -259,47 +253,69 @@ int attack(int sd, character* player,character* target,int move) {
 	if (cID == 2) {
 	    if (move == 1) {                     //Skill Name: Fire ball
 	        if (player->MOVE1_ID == 1) {     //Description:Deal 1.0 mag atk
-	            target->HP_LOST+=;
+	            target->HP_LOST += formula(player->MATK,player->MATKBUFF,player->MATKDEB,1,target->MDEF,target->MDEFBUFF,target->MDEFDEB);
 	        }
 	        if (player->MOVE1_ID == 2) {     //Description:Deal 1.0 mag atk with mag buff(1.3x) for 2 turns
-	            target->HP_LOST+=0;
-	            player->MATKBUFF = player->MATK * 1.3
+	            target->HP_LOST += formula(player->MATK,player->MATKBUFF,player->MATKDEB,1.3,target->MDEF,target->MDEFBUFF,target->MDEFDEB);
+	            player->MATKBUFF = .3;
+	            player->MATKBUFF_TURNS;
 	        }
 	        if (player->MOVE1_ID == 3) {     //Description:Deal 1.1 mag atk and stuns enemy for 1 turn
-	            
+	            target->HP_LOST += formula(player->MATK,player->MATKBUFF,player->MATKDEB,1.1,target->MDEF,target->MDEFBUFF,target->MDEFDEB);
+	            target->STUN = 1;
+	            target->STUN_TURN = 1;
 	        }
 	    }
 	    if (move == 2) {                     //Skill Name: Poison blast
-	        if (player->MOVE2_ID == 1) {     //Description:Does no dmg but applies a DOT (1.3x) for 6 turns(ignores def)
-	            
+	        if (player->MOVE2_ID == 1) {     //Description:Does no dmg but applies a DOT (.3x) for 6 turns
+	            target->DOT = .3;
+	            target->DOT_TURN = 6;
 	        }
-	        if (player->MOVE2_ID == 2) {     //Description:Deals 1.2 initial damage and applies DOT(1.3) for 3 turns(ignores def)
-	            
+	        if (player->MOVE2_ID == 2) {     //Description:Deals 1.2 initial damage and applies DOT(.6) for 3 turns(ignores def)
+	            target->HP_LOST += formula(player->MATK,player->MATKBUFF,player->MATKDEB,1.2,target->MDEF,target->MDEFBUFF,target->MDEFDEB);
+	            target->DOT = .6;
+	            target->DOT_TURN = 3;
 	        }
-	        if (player->MOVE2_ID == 3) {     //Description:Deals 10x mag atk over 4 turns
-	            
+	        if (player->MOVE2_ID == 3) {     //Description:Deals 1x mag atk over 4 turns
+	            target->DOT = 1;
+	            target->DOT_TURN = 4;
 	        }
 	    }
 	    if (move == 3) {                     //Skill Name: Ice storm
 	        if (player->MOVE3_ID == 1) {     //Description: stuns enemy for 2 turns
-	            
+	            target->STUN = 1;
+	            target->STUN_TURN = 2;
 	        }
-	        if (player->MOVE3_ID == 2) {     //Description: Deals 1.5x damage if enemy is cced and prolong any stun for 1 turn
+	        if (player->MOVE3_ID == 2) {     //Description: Deals 1.5x damage if enemy stunned cced, do double damage(3x)
+	            if(target->STUN){
+	            	target->HP_LOST += formula(player->MATK,player->MATKBUFF,player->MATKDEB,3,target->MDEF,target->MDEFBUFF,target->MDEFDEB);
+	            }
+	            else{
+	                target->HP_LOST += formula(player->MATK,player->MATKBUFF,player->MATKDEB,1.5,target->MDEF,target->MDEFBUFF,target->MDEFDEB);
+	            }
 	            
 	        }
 	        if (player->MOVE3_ID == 3) {     //Description: deals 4x damage over 2 turns and stun for 1 turn
+	            target->DOT = 2;
+	            target->DOT_TURN =2;
+	            target->STUN = 1;
+	            target->STUN_TURN = 1;
 	            
 	        }
 	    }
 	    if (move == 4) {                     //Skill Name: Meteor
 	        if (player->MOVE4_ID == 1) {     //Description: 2.5 Magic atk + self stun 1 turn
-	            
+	        	target->HP_LOST += formula(player->MATK,player->MATKBUFF,player->MATKDEB,2.5,target->MDEF,target->MDEFBUFF,target->MDEFDEB);
+	        	player->STUN = 1;
+	        	player->STUN_TURN =1;
 	        }
 	        if (player->MOVE4_ID == 2) {     //Description: 6 magic atk + self stun 2 turn
-	            
+	            target->HP_LOST += formula(player->MATK,player->MATKBUFF,player->MATKDEB,6,target->MDEF,target->MDEFBUFF,target->MDEFDEB);
+	            player->STUN = 1;
+	            player->STUN_TURN = 2;
 	        }
 	        if (player->MOVE4_ID == 3) {     //Description: 3 magic atk 
-	            
+	            target->HP_LOST += formula(player->MATK,player->MATKBUFF,player->MATKDEB,3,target->MDEF,target->MDEFBUFF,target->MDEFDEB);
 	        }
 	    }
 	}
@@ -347,34 +363,42 @@ int attack(int sd, character* player,character* target,int move) {
 	    }
 	    if (move == 2) {                     //Skill Name: Heal
 	        if (player->MOVE2_ID == 1) {     //Description: Heal 1000 health
-	            
+	            target->HP_LOST = heal(target->HP_LOST,1000);
 	        }
 	        if (player->MOVE2_ID == 2) {     //Description: Heal party 1000 health
-	            
+	            target->HP_LOST = heal(target->HP_LOST,1000);
 	        }
 	        if (player->MOVE2_ID == 3) {     //Description: Heal 3000 health
-	            
+	            target->HP_LOST = heal(target->HP_LOST,3000);
 	        }
 	    }
 	    if (move == 3) {                     //Skill Name: Divine Protection
 	        if (player->MOVE3_ID == 1) {     //Description: AOE 1.2 MDEF buff
-	            
+	            target->MDEFBUFF = .2;
+	            target->MDEFBUFF_TURNS = 3;
 	        }
 	        if (player->MOVE3_ID == 2) {     //Description: AOE 1.2 MDEF/DEF buff
-	            
+	            target->MDEFBUFF = .2;
+	            target->MDEFBUFF_TURNS = 3;
+	            target->DEFBUFF = .2;
+	            target->DEFBUFF_TURNS = 3;
 	        }
 	        if (player->MOVE3_ID == 3) {     //Description: AOE 1.2 MDEF/MATK buff
-	            
+	            target->MDEFBUFF = .2;
+	            target->MDEFBUFF_TURNS = 3;
+	            target->MATKBUFF = .2;
+	            target->MATKBUFF_TURNS = 3;
 	        }
 	    }
 	    if (move == 4) {                     //Skill Name: Holy Strike
-	        if (player->MOVE4_ID == 1) {     //Description: .5 magical atk + self heal 500
+	        if (player->MOVE4_ID == 1) {     //Description: 1x using mdef + self heal 500
+	            target->HP_LOST += formula(player->MDEF,player->MDEFBUFF,player->MDEFDEB,2.5,target->MDEF,target->MDEFBUFF,target->MDEFDEB);
+	            player->HP_LOST = heal(player->HP_LOST,500);
+	        }
+	        if (player->MOVE4_ID == 2) {     //Description: 1x using mdef + magical atk + self heal 500 + self buff 1.5 MDEF/DEF
 	            
 	        }
-	        if (player->MOVE4_ID == 2) {     //Description: .5 magical atk + self heal 500 + self buff 1.5 MDEF/DEF
-	            
-	        }
-	        if (player->MOVE4_ID == 3) {     //Description: 1.2 magical atk + self heal 2000
+	        if (player->MOVE4_ID == 3) {     //Description: 2x using mdef + self heal 2000
 	            
 	        }
 	    }

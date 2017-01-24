@@ -120,20 +120,17 @@ void class_select(int sd, char buffer[]){
   }
 }
 
-void chatSYS(int sd, int * chat_set, char * curr_whisp, int * can_do) {
+void chatSYS(int sd, int * chat_set, char * curr_whisp) {
   char buffer[MESSAGE_BUFFER_SIZE];
   char buffer2[MESSAGE_BUFFER_SIZE];
-  char * temp;
+
   char * command;
-  //char * check;
   
   while (1) {
-    if (! *can_do) {
-      if ( (*chat_set) == 0) printf(WHT "Lobby: " RESET);
-      else if ( (*chat_set) == 1) printf(GRN "Party: " RESET);
-      else if ( (*chat_set) == 2) printf(MAG "Whisper %s: " RESET, curr_whisp);
+      if ( (*chat_set) == 0) printf(WHT);
+      else if ( (*chat_set) == 1) printf(GRN);
+      else if ( (*chat_set) == 2) printf(MAG);
       fgets(buffer, MESSAGE_BUFFER_SIZE, stdin);
-      *can_do = 1;
       buffer[strlen(buffer) - 1] = 0;
       
       //printf("I'm here!\n");
@@ -144,43 +141,45 @@ void chatSYS(int sd, int * chat_set, char * curr_whisp, int * can_do) {
         //printf("I'm here!\n");
         strcpy(buffer, buffer2);
         //printf("I'm here!\n");
+        write(sd, buffer, MESSAGE_BUFFER_SIZE);
       }
       else {
+        char * temp;
         //IS A COMMAND CHECK FOR CERTAIN COMMANDS
         printf("I'm in commandcheck!\n");
+        printf("I'm here!\n");
         strcpy(temp, buffer);
+        printf("I'm here!\n");
         strsep(&temp, "/");
+        printf("I'm here!\n");
         command = strsep(&temp, " ");
+        printf("I'm here!\n");
         
-        if ( (! strcmp(command, "lobby")) || (! strcmp(command, "l")) ) {
-          *chat_set = 0;
-          break;
-        }
-        else if ( (! strcmp(command, "party")) || (! strcmp(command, "p")) ) {
-          *chat_set = 1;
-          break;
-        }
-        else if ( (! strcmp(command, "whisper")) || (! strcmp(command, "w")) ) {
-          *chat_set = 2;
-          strcpy(curr_whisp, temp); 
-          break;
-        }
-        else if (! strcmp(command, "help")) printf("%s\n", HELP);
+        //if ( (! strcmp(command, "lobby")) || (! strcmp(command, "l")) ) {
+        //  *chat_set = 0;
+        //}
+        //else if ( (! strcmp(command, "party")) || (! strcmp(command, "p")) ) {
+        //  *chat_set = 1;
+        //}
+        //else if ( (! strcmp(command, "whisper")) || (! strcmp(command, "w")) ) {
+        //  *chat_set = 2;
+        //  strcpy(curr_whisp, temp); 
+        //}
+        
+        if (! strcmp(command, "help")) printf("%s\n", HELP);
+        else write(sd, buffer, MESSAGE_BUFFER_SIZE);
       }
       //printf("I'm performing the write\n");
       //printf("sent message %s\n", buffer);
-      write(sd, buffer, MESSAGE_BUFFER_SIZE);
       //printf("I've done the write!!\n");
-    }
   }
 }
 
-void ENDCUR(int sd, int * chat_set, char * curr_whisp, int * can_do) { //does graphical display and ncurses 
+void ENDCUR(int sd, int * chat_set, char * curr_whisp) { //does graphical display and ncurses 
   char buffer[MESSAGE_BUFFER_SIZE];
   char * buffer2 = (char *)malloc(MESSAGE_BUFFER_SIZE);
   char * lead;
   char * command;
-  int L;
   
   while (1) {
       read(sd, buffer, MESSAGE_BUFFER_SIZE);
@@ -189,8 +188,8 @@ void ENDCUR(int sd, int * chat_set, char * curr_whisp, int * can_do) { //does gr
       strcpy(buffer2, buffer);
       //printf("buffer2: %s\n", buffer2); 
       lead = strsep(&buffer2, " ");
-      //sscanf(buffer, "%d %s", &L, buffer2);
-      //L = buffer[0];
+      
+      
       //printf("lead: %s\n", lead);
       //printf("buffer2: %s\n", buffer2);
       if (strcmp(lead, "/")) { //DO COLORS
@@ -198,7 +197,6 @@ void ENDCUR(int sd, int * chat_set, char * curr_whisp, int * can_do) { //does gr
         else if (! strcmp(lead, "1")) printf(GRN "%s\n" RESET, buffer2);
         else if (! strcmp(lead, "2")) printf(MAG "%s\n" RESET, buffer2);
         else if (! strcmp(lead, "3")) printf(CYN "%s\n" RESET, buffer2);
-        *can_do = 0;
       }
       else {
         command = strsep(&buffer2, " ");
@@ -212,7 +210,6 @@ void ENDCUR(int sd, int * chat_set, char * curr_whisp, int * can_do) { //does gr
 }
 
 int main( int argc, char *argv[] ) {
-  int can_do = 0;
   char *host;
   if (argc != 2 ) {
     printf("host not specified, connecting to 127.0.0.1\n");
@@ -227,7 +224,8 @@ int main( int argc, char *argv[] ) {
   char buffer[MESSAGE_BUFFER_SIZE];
   //char * input = buffer;
   
-  int chat_set = 0; //chat_setting for players
+  int * chat_set = malloc(sizeof(int)); //chat_setting for players
+  *chat_set = 0;
   char * curr_whisp = (char *)malloc(MESSAGE_BUFFER_SIZE);
   
   printf(CYN);
@@ -242,8 +240,8 @@ int main( int argc, char *argv[] ) {
   char buffer2[MESSAGE_BUFFER_SIZE];
   //class_select(sd, buffer2);
   int subPID = fork();
-  if (subPID) chatSYS(sd, &chat_set, curr_whisp, &can_do); //THIS SHOULD WORK RIGHT???
-  else ENDCUR(sd, &chat_set, curr_whisp, &can_do);
+  if (subPID) chatSYS(sd, chat_set, curr_whisp); //THIS SHOULD WORK RIGHT???
+  else ENDCUR(sd, chat_set, curr_whisp);
   
   return 0;
 }

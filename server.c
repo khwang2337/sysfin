@@ -6,6 +6,7 @@
 #include <sys/ipc.h>
 #include <sys/types.h>
 #include <sys/shm.h>
+#include <sys/stat.h>
 
 #include "networking.h"
 
@@ -72,7 +73,6 @@ void registerr(int sd, character * player) {
   int fd = open(name, O_WRONLY, 0);
   write(fd, buffer, strlen(buffer)); //we want newline
   
-  //REST WILL BE FILLED IN
 }
 
 int checkPASS(char * name, char * pass) {
@@ -109,6 +109,7 @@ void login(int sd, character * player) {
       check = 0;
     }
   }
+  strcpy(player->cname, name); //sets playername
   
   check = 1;
   while (check) {
@@ -175,7 +176,7 @@ void command(int sd, char buffer[], character * player) {
   if (! strcmp(commandS,"use")) {
     char * a = strsep(&buffer," ");
     char * b = strsep(&buffer," ");
-    //action(player, sd, a, b); //commented to try compiling
+    //attack(player, sd, a, b); //commented to try compiling
   }
   else if ( (! strcmp(commandS, "reply")) || (! strcmp(commandS, "r"))) {
     if (strcmp(player->last_whisp, "")) {//exists
@@ -184,10 +185,21 @@ void command(int sd, char buffer[], character * player) {
     }
     else write(sd, "3 [Server]: No one to reply to", 31);
   } 
+  else if (! strcmp(commandS, "getkey")) {
+    if (player->in_party) {
+      char buffer2[MESSAGE_BUFFER_SIZE];
+      printf("checking party\n");
+      sprintf(buffer2, "3 [Server]: partykey is %d", player->party_key);
+      printf("buffer2: %s\n", buffer2);
+      write(sd, buffer2, MESSAGE_BUFFER_SIZE);
+    }
+    else write(sd, "3 [Server]: You are not in a party", 35);
+  }
   else if (! strcmp(commandS, "createparty")) { //check in_party(or see if party_key) is 0, ftok create shared memory, set party_key
     //nt shmd = shmget(420, 1024, IPC_CREAT | 0664);
     //size of party 228 bytes
     if (! player->in_party) {
+      player->in_party = 1;
       player->party_key = ftok(player->cname, getpid());
       int partyID = shmget(player->party_key, 228, IPC_CREAT | 0644);
       player->Party = shmat(partyID, 0, 0);
@@ -332,6 +344,8 @@ void command(int sd, char buffer[], character * player) {
           printf("This is where I enter the dungeon\n"); //dungeon difficulty
           //int diff;
           //startDungeon(sd, player->Party, diff);
+          //startDungeon(sd,player->Party, diff);
+          
         }
         else {
           if (player->Party->mate1.does_exist && (! player->Party->mate1.is_ready)) {
@@ -372,11 +386,14 @@ void chat(int sd, char buffer[], character * player) {
     printf("I used sprintf to write to MEM!\n");
   }
   else if (buffer[0] == '1') {
+    printf("PARTYCHAT!!!\n");
     //if (! player->in_party) write(sd, ) //DO IN CLIENT
     //sscanf(buffer, "%d %s", mode, temp);
     //CHECK IF PLAYER IS IN A PARTY!!!
     mode = strsep(&buffer, " ");
-    sprintf(MEM, "%s/%s/%s %s %s %s /%s", mode, player->cname, player->Party->leader.name, player->Party->mate1.name, player->Party->mate2.name, player->Party->mate3.name, buffer);  //kk
+    printf("I'm here!!\n");
+    if (player->in_party) sprintf(MEM, "%s/%s/%s %s %s %s /%s", mode, player->cname, player->Party->leader.name, player->Party->mate1.name, player->Party->mate2.name, player->Party->mate3.name, buffer);  //kk
+    else write(sd, "3 [Server]: You are not in a party", 35);
   }
   else if (buffer[0] == '2') {
     char * whispName;
@@ -504,7 +521,8 @@ void setup(character * player, int sd) {
       write(sd, "classy", MESSAGE_BUFFER_SIZE);
       read(sd, buffer, MESSAGE_BUFFER_SIZE);
       if (!strcmp(buffer, "success")){
-        int fd = open(player->cname,O_CREAT|O_APPEND|O_WRONLY,0644);
+        umask(0000);
+        int fd = open(player->cname,O_APPEND|O_WRONLY);
         char * a = convertS(player,buffer);
         printf("yolo%s\nyolo",a);
         write(fd, a ,MESSAGE_BUFFER_SIZE);
